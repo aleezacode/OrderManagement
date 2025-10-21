@@ -15,8 +15,8 @@ namespace OrderManagement.Models
         public string? Id { get; set; }
         [BsonRepresentation(BsonType.ObjectId)]
         public required string UserId { get; set; }
-        [BsonRepresentation(BsonType.ObjectId)]
-        public required string OrderId { get; set; }
+        [BsonRepresentation(BsonType.String)]
+        public Guid OrderNumber { get; set; }
         public decimal TotalAmount { get; set; }
         public OrderStatus OrderStatus { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

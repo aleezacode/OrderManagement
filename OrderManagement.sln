@@ -5,6 +5,8 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrderManagement", "OrderManagement\OrderManagement.csproj", "{71A32145-8A35-4481-8575-CC9E6F7EC796}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrderManagementTests", "OrderManagementTests\OrderManagementTests.csproj", "{05075F51-AA34-4B22-8D69-D35ADD5731C8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,18 @@ Global
 		{71A32145-8A35-4481-8575-CC9E6F7EC796}.Release|x64.Build.0 = Release|Any CPU
 		{71A32145-8A35-4481-8575-CC9E6F7EC796}.Release|x86.ActiveCfg = Release|Any CPU
 		{71A32145-8A35-4481-8575-CC9E6F7EC796}.Release|x86.Build.0 = Release|Any CPU
+		{05075F51-AA34-4B22-8D69-D35ADD5731C8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{05075F51-AA34-4B22-8D69-D35ADD5731C8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{05075F51-AA34-4B22-8D69-D35ADD5731C8}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{05075F51-AA34-4B22-8D69-D35ADD5731C8}.Debug|x64.Build.0 = Debug|Any CPU
+		{05075F51-AA34-4B22-8D69-D35ADD5731C8}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{05075F51-AA34-4B22-8D69-D35ADD5731C8}.Debug|x86.Build.0 = Debug|Any CPU
+		{05075F51-AA34-4B22-8D69-D35ADD5731C8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{05075F51-AA34-4B22-8D69-D35ADD5731C8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{05075F51-AA34-4B22-8D69-D35ADD5731C8}.Release|x64.ActiveCfg = Release|Any CPU
+		{05075F51-AA34-4B22-8D69-D35ADD5731C8}.Release|x64.Build.0 = Release|Any CPU
+		{05075F51-AA34-4B22-8D69-D35ADD5731C8}.Release|x86.ActiveCfg = Release|Any CPU
+		{05075F51-AA34-4B22-8D69-D35ADD5731C8}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
