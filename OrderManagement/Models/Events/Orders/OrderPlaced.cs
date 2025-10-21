@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace OrderManagement.Models.Events
+namespace OrderManagement.Models.Events.Orders
 {
     public class OrderPlaced
     {
