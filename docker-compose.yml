@@ -11,5 +11,67 @@ services:
     environment:
       - MONGO_INITDB_DATABASE=${MONGO_DATABASE_NAME}
 
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.6.0
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+
+  kafka:
+    image: confluentinc/cp-kafka:7.6.0
+    container_name: kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"  # External access (from host)
+      - "9093:9093"  # Internal communication (from other containers)
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+
+      # 👇 Define listeners for internal & external traffic
+      KAFKA_LISTENERS: INTERNAL://0.0.0.0:9093,EXTERNAL://0.0.0.0:9092
+
+      # 👇 Advertise internal DNS name (service name) + external host (localhost)
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:9093,EXTERNAL://localhost:9092
+
+      # 👇 Map listener names to protocol
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
+
+      # 👇 Kafka will use INTERNAL listener for broker communication
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+
+      # 👇 Single-broker dev environment settings
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+
+    healthcheck:
+      test: ["CMD", "bash", "-c", "nc -z localhost 9092"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  akhq:
+    image: tchiotludo/akhq:latest
+    container_name: akhq
+    depends_on:
+      - kafka
+    ports:
+      - "8080:8080"
+    environment:
+      AKHQ_CONFIGURATION: |
+        akhq:
+          server:
+            access-log:
+              enabled: true
+          connections:
+            local:
+              properties:
+                bootstrap.servers: "kafka:9093"
+
 volumes:
   mongodb_data:

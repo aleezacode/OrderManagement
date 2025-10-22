@@ -24,8 +24,8 @@ builder.Services.AddSingleton<IMongoDatabase>(sp =>
 });
 
 // Uncomment the following lines to seed the database
-//await DatabaseSeeder.SeedAsync(
-//    builder.Services.BuildServiceProvider().GetRequiredService<IMongoDatabase>());
+await DatabaseSeeder.SeedAsync(
+   builder.Services.BuildServiceProvider().GetRequiredService<IMongoDatabase>());
 
 builder.Services.AddScoped<IRepository<Order>, OrderRepository>();
 builder.Services.AddScoped<IRepository<Inventory>, InventoryRepository>();
