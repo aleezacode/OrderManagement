@@ -15,7 +15,10 @@ namespace OrderManagement.Kafka
             var config = new ProducerConfig
             {
                 BootstrapServers = configuration["Kafka:BootstrapServers"],
-                Acks = Acks.All
+                Acks = Acks.All,
+                EnableIdempotence = true,
+                LingerMs = 5,
+                MessageTimeoutMs = 30000
             };
 
             _producer = new ProducerBuilder<string, string>(config).Build();
