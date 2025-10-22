@@ -4,6 +4,8 @@ using MediatR;
 using OrderManagement.Repositories;
 using OrderManagement.Models;
 using OrderManagement.Kafka;
+using OrderManagement.Consumers;
+using Confluent.Kafka;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,10 +25,6 @@ builder.Services.AddSingleton<IMongoDatabase>(sp =>
     return client.GetDatabase(settings.DatabaseName);
 });
 
-// Uncomment the following lines to seed the database
-await DatabaseSeeder.SeedAsync(
-   builder.Services.BuildServiceProvider().GetRequiredService<IMongoDatabase>());
-
 builder.Services.AddScoped<IRepository<Order>, OrderRepository>();
 builder.Services.AddScoped<IRepository<Inventory>, InventoryRepository>();
 builder.Services.AddScoped<IRepository<Payment>, PaymentRepository>();
@@ -36,12 +34,21 @@ builder.Services.AddSingleton<IEventProducer, KafkaEventProducer>();
 
 // Register MediatR
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
+//Not able to run consumer and api at the same time
+//Consumers also not picking up messages (can be because of json serialization issue)
+builder.Services.AddHostedService<OrderPlacedConsumer>();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<IMongoDatabase>();
+    await DatabaseSeeder.SeedAsync(db);
+}
 
 // Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())
@@ -50,7 +57,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI(c =>
     {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "OrderManagement API V1");
-        c.RoutePrefix = string.Empty; // Makes Swagger available at root URL
+        c.RoutePrefix = string.Empty;
     });
 }
 

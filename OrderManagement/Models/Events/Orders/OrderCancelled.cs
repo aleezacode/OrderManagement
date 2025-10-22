@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace OrderManagement.Models.Events
 {
-    public class OrderCancelled
+    public class OrderCancelled : IEvent
     {
         public string OrderId { get; set; }
         public string UserId { get; set; }

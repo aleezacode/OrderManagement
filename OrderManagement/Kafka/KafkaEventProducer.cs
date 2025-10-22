@@ -28,7 +28,7 @@ namespace OrderManagement.Kafka
         {
             var message = new Message<string, string>
             {
-                Key = Guid.NewGuid().ToString(),
+                Key = @event!.GetType().Name,
                 Value = System.Text.Json.JsonSerializer.Serialize(@event)
             };
 

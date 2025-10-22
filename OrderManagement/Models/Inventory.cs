@@ -15,7 +15,6 @@ namespace OrderManagement.Models
         [BsonRepresentation(BsonType.ObjectId)]
         public required string ProductId { get; set; }
         public int Quantity { get; set; }
-        public int? ReservedQuantity { get; set; }
         public DateTime LastUpdatedAt { get; set; } = DateTime.UtcNow;
     }
 }

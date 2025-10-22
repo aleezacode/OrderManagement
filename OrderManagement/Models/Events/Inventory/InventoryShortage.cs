@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace OrderManagement.Models.Events.Inventory
 {
-    public class InventoryShortage
+    public class InventoryShortage : IEvent
     {
         public string OrderId { get; set; }
         public string ProductId { get; set; }

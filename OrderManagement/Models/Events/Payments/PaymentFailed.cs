@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace OrderManagement.Models.Events.Payments
 {
-    public class PaymentFailed
+    public class PaymentFailed : IEvent
     {
         public string OrderId { get; set; }
         public string UserId { get; set; }

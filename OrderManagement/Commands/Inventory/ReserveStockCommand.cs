@@ -2,11 +2,15 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using MediatR;
 
 namespace OrderManagement.Commands.Inventory
 {
-    public class ReserveStockCommand
+    public record ReserveStockCommand(string OrderId, List<ReservedItem> ReservedItems) : IRequest<string>;
+
+    public record ReservedItem
     {
-        
+        public string ProductId { get; init; }
+        public int Quantity { get; init; }
     }
 }

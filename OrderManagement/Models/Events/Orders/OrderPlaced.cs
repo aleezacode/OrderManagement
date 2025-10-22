@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace OrderManagement.Models.Events.Orders
 {
-    public class OrderPlaced
+    public class OrderPlaced : IEvent
     {
         public string OrderId { get; set; }
 
