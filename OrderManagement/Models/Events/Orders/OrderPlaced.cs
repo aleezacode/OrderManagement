@@ -11,7 +11,7 @@ namespace OrderManagement.Models.Events.Orders
 
         public string UserId { get; set; }
 
-        public List<OrderItem> Items { get; set; } = new();
+        public OrderItem Item { get; set; }
 
         public decimal TotalAmount { get; set; }
 

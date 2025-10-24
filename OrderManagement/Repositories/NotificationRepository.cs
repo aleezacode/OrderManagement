@@ -6,6 +6,8 @@ using OrderManagement.Models;
 using MongoDB.Driver;
 using Microsoft.Extensions.Options;
 using OrderManagement.Configuration;
+using System.Linq.Expressions;
+using MongoDB.Bson;
 
 namespace OrderManagement.Repositories
 {
@@ -29,6 +31,11 @@ namespace OrderManagement.Repositories
         {
             return await _notificationCollection.DeleteOneAsync(n => n.Id == id)
                 .ContinueWith(task => task.Result.DeletedCount > 0);
+        }
+
+        public async Task<Notification?> FindOneAsync(Expression<Func<Notification, bool>> predicate)
+        {
+            return await _notificationCollection.Find(predicate).FirstOrDefaultAsync();
         }
 
         public async Task<IEnumerable<Notification>> GetAllAsync()

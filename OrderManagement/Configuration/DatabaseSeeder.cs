@@ -3,6 +3,9 @@ using MongoDB.Driver;
 using OrderManagement.Models;
 public static class DatabaseSeeder
 {
+    private static readonly string KeyboardId = ObjectId.GenerateNewId().ToString();
+    private static readonly string MouseId = ObjectId.GenerateNewId().ToString();
+    private static readonly string MonitorId = ObjectId.GenerateNewId().ToString();
     public static async Task SeedAsync(IMongoDatabase database)
     {
         await SeedProductsAsync(database);
@@ -19,9 +22,9 @@ public static class DatabaseSeeder
         {
             var products = new List<Product>
             {
-                new() { Id = "E386D2223E5BAA35CC2D4BCC", Name = "Keyboard", Price = 49.99M },
-                new() { Id = "DE3DD781D59DFFE74F38FEC8", Name = "Mouse", Price = 29.99M },
-                new() { Id = "BA53B385220BDE8F9BC9E7C1", Name = "Monitor", Price = 199.99M, }
+                new() { Id = KeyboardId, Name = "Keyboard", Price = 49.99M },
+                new() { Id = MouseId, Name = "Mouse", Price = 29.99M },
+                new() { Id = MonitorId, Name = "Monitor", Price = 199.99M, }
             };
 
             await collection.InsertManyAsync(products);
@@ -38,9 +41,9 @@ public static class DatabaseSeeder
         {
             var inventory = new List<Inventory>
             {
-                new() { ProductId = "E386D2223E5BAA35CC2D4BCC", Quantity = 50 },
-                new() { ProductId = "DE3DD781D59DFFE74F38FEC8", Quantity = 50 },
-                new() { ProductId = "BA53B385220BDE8F9BC9E7C1", Quantity = 50 }
+                new() { ProductId = KeyboardId, Quantity = 50 },
+                new() { ProductId = MouseId, Quantity = 50 },
+                new() { ProductId = MonitorId, Quantity = 50 }
             };
 
             await collection.InsertManyAsync(inventory);

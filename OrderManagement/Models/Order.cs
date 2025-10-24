@@ -21,7 +21,7 @@ namespace OrderManagement.Models
         public OrderStatus OrderStatus { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
-        public List<OrderItem> Items { get; set; } = new List<OrderItem>();
+        public OrderItem Item { get; set; }
     }
 
     public class OrderItem

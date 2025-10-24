@@ -6,7 +6,7 @@ using MediatR;
 
 namespace OrderManagement.Commands.Order
 {
-    public record PlaceOrderCommand(string UserId, List<OrderItem> Items) : IRequest<string>;
+    public record PlaceOrderCommand(string UserId, OrderItem Item) : IRequest<string>;
     public record OrderItem
     {
         public string ProductId { get; init; }

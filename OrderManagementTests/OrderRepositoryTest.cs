@@ -29,12 +29,12 @@ namespace OrderManagementTests
                 OrderStatus = OrderStatus.Placed,
             };
 
-            order.Items.Add(new OrderItem
+            order.Item = new OrderItem
             {
                 ProductId = "de3dd781d59dffe74f38fec8",
                 Quantity = 2,
                 UnitPrice = 29.99m
-            });
+            };
 
             var createdOrder = await _orderRepository.CreateAsync(order);
             Assert.NotNull(createdOrder);
@@ -50,12 +50,12 @@ namespace OrderManagementTests
                 TotalAmount = 59.98m,
                 OrderStatus = OrderStatus.Placed,
             };
-            order.Items.Add(new OrderItem
+            order.Item =new OrderItem
             {
                 ProductId = "de3dd781d59dffe74f38fec8",
                 Quantity = 2,
                 UnitPrice = 29.99m
-            });
+            };
 
             await _orderRepository.CreateAsync(order);
             var fetchedOrder = await _orderRepository.GetByIdAsync(order.Id);

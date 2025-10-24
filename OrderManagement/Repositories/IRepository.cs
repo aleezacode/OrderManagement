@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Linq.Expressions;
+using MongoDB.Bson;
 
 namespace OrderManagement.Repositories
 {
@@ -12,5 +14,8 @@ namespace OrderManagement.Repositories
         Task<IEnumerable<T>> GetAllAsync();
         Task<bool> UpdateAsync(string id, T entity);
         Task<bool> DeleteAsync(string id); 
+
+        //Generic methods
+        Task<T?> FindOneAsync(Expression<Func<T, bool>> predicate);
     }
 }

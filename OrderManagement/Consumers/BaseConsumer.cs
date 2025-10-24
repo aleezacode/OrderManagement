@@ -5,10 +5,11 @@ using System.Threading.Tasks;
 using Confluent.Kafka;
 using MediatR;
 using System.Text.Json;
+using OrderManagement.Models.Events;
 
 namespace OrderManagement.Consumers
 {
-    public abstract class BaseConsumer<IEvent> : BackgroundService
+    public abstract class BaseConsumer<TEvent> : BackgroundService where TEvent : class, IEvent
     {
         private readonly IConsumer<string, string> _consumer;
         private readonly string _topicName;
@@ -30,21 +31,36 @@ namespace OrderManagement.Consumers
                 while (!stoppingToken.IsCancellationRequested)
                 {
                     var result = _consumer.Consume(stoppingToken);
-                    var message = JsonSerializer.Deserialize<IEvent>(result.Message.Value);
-                    if (message != null)
+                    if (result?.Message != null)
                     {
-                        await ProcessEventAsync(message, stoppingToken);
+                        try
+                        {
+                            var message = JsonSerializer.Deserialize<TEvent>(result.Message.Value);
+                            if (message != null)
+                            {
+                                await ProcessEventAsync(message, stoppingToken);
+                                _consumer.Commit(result);
+                            }
+                        }
+                        catch (System.Exception)
+                        {
+                            throw;
+                        }
                     }
-
-                    _consumer.Commit(result);
                 }
             }
             finally
             {
-               _consumer.Close(); 
+                _consumer.Close();
             }
         }
 
-        protected abstract Task ProcessEventAsync(IEvent @event, CancellationToken cancellationToken);
+        protected abstract Task ProcessEventAsync(TEvent @event, CancellationToken cancellationToken);
+
+        public override void Dispose()
+        {
+            _consumer?.Dispose();
+            base.Dispose();
+        }
     }
 }

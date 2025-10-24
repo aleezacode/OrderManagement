@@ -4,36 +4,33 @@ using System.Linq;
 using System.Threading.Tasks;
 using Confluent.Kafka;
 using MediatR;
-using OrderManagement.Models.Events.Orders;
-using OrderManagement.Commands.Inventory;
+using OrderManagement.Commands.Notification;
+using OrderManagement.Models.Events.Inventory;
 
 namespace OrderManagement.Consumers
 {
-    public class OrderPlacedConsumer : BaseConsumer<OrderPlaced>
+    public class InventoryReservedConsumer : BaseConsumer<InventoryReserved>
     {
         private readonly IServiceProvider _serviceProvider;
-        public OrderPlacedConsumer(IServiceProvider serviceProvider) : base(new ConsumerConfig
+        public InventoryReservedConsumer(IServiceProvider serviceProvider) : base(new ConsumerConfig
         {
             BootstrapServers = "localhost:9092",
             GroupId = "order-management-group",
             AutoOffsetReset = AutoOffsetReset.Earliest
-        }, "orders")
+        }, "inventory")
         {
             _serviceProvider = serviceProvider;
         }
 
-        protected override async Task ProcessEventAsync(OrderPlaced @event, CancellationToken cancellationToken)
+        protected override Task ProcessEventAsync(InventoryReserved @event, CancellationToken cancellationToken)
         {
             using var scope = _serviceProvider.CreateScope();
             var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
-            
-            var reservedItem = new ReservedItem
+
+            var notificationCommand = new SendNotificationCommand
             {
-                ProductId = @event.Item.ProductId,
-                Quantity = @event.Item.Quantity
+                
             };
-            
-            await mediator.Send(new ReserveStockCommand(@event.OrderId, reservedItem), cancellationToken);
         }
     }
 }

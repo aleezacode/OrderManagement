@@ -35,7 +35,6 @@ builder.Services.AddSingleton<IEventProducer, KafkaEventProducer>();
 // Register MediatR
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
 //Not able to run consumer and api at the same time
-//Consumers also not picking up messages (can be because of json serialization issue)
 builder.Services.AddHostedService<OrderPlacedConsumer>();
 
 builder.Services.AddControllers();

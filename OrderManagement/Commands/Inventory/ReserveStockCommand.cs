@@ -6,7 +6,7 @@ using MediatR;
 
 namespace OrderManagement.Commands.Inventory
 {
-    public record ReserveStockCommand(string OrderId, List<ReservedItem> ReservedItems) : IRequest<string>;
+    public record ReserveStockCommand(string OrderId, ReservedItem ReservedItem) : IRequest<string>;
 
     public record ReservedItem
     {

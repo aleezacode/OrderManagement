@@ -1,9 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
+using MongoDB.Bson;
 using MongoDB.Driver;
+using MongoDB.Driver.Linq;
 using OrderManagement.Configuration;
 using OrderManagement.Models;
 
@@ -29,6 +32,11 @@ namespace OrderManagement.Repositories
         {
             return await _inventoryCollection.DeleteOneAsync(i => i.Id == id)
                 .ContinueWith(task => task.Result.DeletedCount > 0);
+        }
+
+        public async Task<Inventory?> FindOneAsync(Expression<Func<Inventory, bool>> predicate)
+        {
+            return await _inventoryCollection.Find(predicate).FirstOrDefaultAsync();
         }
 
         public async Task<IEnumerable<Inventory>> GetAllAsync()

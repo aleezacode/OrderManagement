@@ -6,6 +6,7 @@ using OrderManagement.Models;
 using MongoDB.Driver;
 using Microsoft.Extensions.Options;
 using OrderManagement.Configuration;
+using System.Linq.Expressions;
 
 namespace OrderManagement.Repositories
 {
@@ -29,6 +30,11 @@ namespace OrderManagement.Repositories
         {
             return await _paymentCollection.DeleteOneAsync(p => p.Id == id)
                 .ContinueWith(task => task.Result.DeletedCount > 0);
+        }
+
+        public async Task<Payment?> FindOneAsync(Expression<Func<Payment, bool>> predicate)
+        {
+            return await _paymentCollection.Find(predicate).FirstOrDefaultAsync();
         }
 
         public async Task<IEnumerable<Payment>> GetAllAsync()

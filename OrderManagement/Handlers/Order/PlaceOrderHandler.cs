@@ -11,6 +11,7 @@ using OrderManagement.Models;
 using OrderManagement.Kafka;
 using OrderManagement.Models.Events.Orders;
 using OrderItemEvent = OrderManagement.Models.Events.Orders.OrderItem;
+using MongoDB.Bson;
 
 namespace OrderManagement.Handlers.Order
 {
@@ -29,13 +30,13 @@ namespace OrderManagement.Handlers.Order
 
         public async Task<string> Handle(PlaceOrderCommand request, CancellationToken cancellationToken)
         {
-            var orderItems = await BuildeOrderItems(request.Items);
+            var orderItem = await BuildeOrderItems(request.Item);
             var order = new OrderModel
             {
                 UserId = request.UserId,
-                Items = orderItems,
+                Item = orderItem,
                 OrderStatus = OrderStatus.Placed,
-                TotalAmount = orderItems.Sum(i => i.UnitPrice * i.Quantity),
+                TotalAmount = orderItem.UnitPrice * orderItem.Quantity,
                 CreatedAt = DateTime.UtcNow
             };
             var insertedOrder = await _orderRepository.CreateAsync(order);
@@ -45,41 +46,34 @@ namespace OrderManagement.Handlers.Order
             {
             OrderId = insertedOrder.Id,
             UserId = order.UserId,
-            Items = order.Items.Select(i => new OrderItemEvent
+            Item = new OrderItemEvent
             {
-                ProductId = i.ProductId,
-                Quantity = i.Quantity,
-                UnitPrice = i.UnitPrice
-            }).ToList(),
+                ProductId = order.Item.ProductId,
+                Quantity = order.Item.Quantity,
+                UnitPrice = order.Item.UnitPrice
+            },
             TotalAmount = order.TotalAmount
             };
 
             await _eventProducer.ProduceAsync("orders", orderPlacedEvent, cancellationToken);
 
-            return insertedOrder.Id;
+            return insertedOrder.Id.ToString();
         }
 
-        private async Task<List<OrderItemModel>> BuildeOrderItems(List<Commands.Order.OrderItem> items)
+        private async Task<OrderItemModel> BuildeOrderItems(Commands.Order.OrderItem item)
         {
-            var orderItems = new List<OrderItemModel>();
-
-            foreach (var item in items)
-            {
-                var product = await _productRepository.GetByIdAsync(item.ProductId);
+            var product = await _productRepository.GetByIdAsync(item.ProductId);
                 if (product == null)
                 {
                     throw new Exception($"Product with ID {item.ProductId} not found.");
                 }
 
-                orderItems.Add(new OrderItemModel
+                return new OrderItemModel()
                 {
                     ProductId = item.ProductId,
                     Quantity = item.Quantity,
                     UnitPrice = product.Price
-                });
-            }
-
-            return orderItems;
+                };
         }
     }
 }
