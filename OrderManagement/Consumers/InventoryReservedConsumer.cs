@@ -22,15 +22,17 @@ namespace OrderManagement.Consumers
             _serviceProvider = serviceProvider;
         }
 
-        protected override Task ProcessEventAsync(InventoryReserved @event, CancellationToken cancellationToken)
+        protected override async Task ProcessEventAsync(InventoryReserved @event, CancellationToken cancellationToken)
         {
             using var scope = _serviceProvider.CreateScope();
             var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
 
             var notificationCommand = new SendNotificationCommand
             {
-                
+
             };
+            
+            await mediator.Send(notificationCommand, cancellationToken);
         }
     }
 }

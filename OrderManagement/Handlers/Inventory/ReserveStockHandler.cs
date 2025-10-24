@@ -29,7 +29,7 @@ namespace OrderManagement.Handlers.Inventory
             {
                 var inventoryShortageEvent = new InventoryShortage
                 {
-                    OrderId = command.OrderId,
+                    OrderNumber = command.OrderNumber,
                     ProductId = inventoryItem?.ProductId.ToString() ?? command.ReservedItem.ProductId,
                     RequestedQuantity = command.ReservedItem.Quantity,
                     AvailableQuantity = inventoryItem?.Quantity ?? 0,
@@ -44,13 +44,13 @@ namespace OrderManagement.Handlers.Inventory
 
             var inventoryReservedEvent = new InventoryReserved
             {
-                OrderId = command.OrderId,
+                OrderNumber = command.OrderNumber,
                 ProductId = inventoryItem.ProductId.ToString(),
                 Reason = "Stock reserved successfully"
             };
             await _eventProducer.ProduceAsync("inventory", inventoryReservedEvent, cancellationToken);
 
-            return command.OrderId;
+            return command.OrderNumber.ToString();
        }
     }
 }

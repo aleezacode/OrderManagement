@@ -23,14 +23,14 @@ namespace OrderManagement.Controllers
         [HttpPost("api/orders")]
         public async Task<IActionResult> CreateOrder([FromBody] CreateOrderRequest request)
         {
-            var orderItems = request.items.Select(i => new OrderItem
+            var orderItems = new OrderItem
             {
-                ProductId = i.productId,
-                Quantity = i.quantity,
-                UnitPrice = i.unitPrice
-            }).ToList();
+                ProductId = request.Item.ProductId,
+                Quantity = request.Item.Quantity,
+                UnitPrice = request.Item.UnitPrice
+            };
 
-            var placeOrderCommand = new PlaceOrderCommand(request.userId, orderItems);
+            var placeOrderCommand = new PlaceOrderCommand(request.UserId, orderItems);
 
             var orderId = await _mediator.Send(placeOrderCommand);
             return Ok(new { OrderId = orderId });

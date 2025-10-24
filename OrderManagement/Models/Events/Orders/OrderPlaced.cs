@@ -7,7 +7,7 @@ namespace OrderManagement.Models.Events.Orders
 {
     public class OrderPlaced : IEvent
     {
-        public string OrderId { get; set; }
+        public Guid OrderNumber { get; set; } 
 
         public string UserId { get; set; }
 

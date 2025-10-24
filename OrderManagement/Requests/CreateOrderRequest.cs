@@ -7,14 +7,14 @@ namespace OrderManagement.Requests
 {
     public class CreateOrderRequest
     {
-        public string userId { get; set; }
-        public List<OrderItemRequest> items { get; set; }
+        public string UserId { get; set; }
+        public OrderItemRequest Item { get; set; }
     }
 
     public class OrderItemRequest
     {
-        public string productId { get; set; }
-        public int quantity { get; set; }
-        public decimal unitPrice { get; set; }
+        public string ProductId { get; set; }
+        public int Quantity { get; set; }
+        public decimal UnitPrice { get; set; }
     }
 }

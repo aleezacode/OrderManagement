@@ -44,7 +44,7 @@ namespace OrderManagement.Handlers.Order
 
             var orderPlacedEvent = new OrderPlaced
             {
-            OrderId = insertedOrder.Id,
+            OrderNumber = insertedOrder.OrderNumber,
             UserId = order.UserId,
             Item = new OrderItemEvent
             {
