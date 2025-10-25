@@ -10,6 +10,8 @@ services:
       - mongodb_data:/data/db
     environment:
       - MONGO_INITDB_DATABASE=${MONGO_DATABASE_NAME}
+    networks:
+      - order-management-network
 
   zookeeper:
     image: confluentinc/cp-zookeeper:7.6.0
@@ -19,6 +21,8 @@ services:
       ZOOKEEPER_TICK_TIME: 2000
     ports:
       - "2181:2181"
+    networks:
+      - order-management-network
 
   kafka:
     image: confluentinc/cp-kafka:7.6.0
@@ -54,6 +58,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 10
+    networks:
+      - order-management-network
 
   akhq:
     image: tchiotludo/akhq:latest
@@ -72,6 +78,36 @@ services:
             local:
               properties:
                 bootstrap.servers: "kafka:9093"
+    networks:
+      - order-management-network
+
+  ordermanagement-api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: ordermanagement-api
+    ports:
+      - "5158:80"
+    depends_on:
+      mongodb:
+        condition: service_started
+      kafka:
+        condition: service_healthy
+    environment:
+      - MongoDBSettings__ConnectionString=mongodb://mongodb:27017
+      - MongoDBSettings__DatabaseName=OrderManagementDB
+      - MongoDBSettings__UserCollectionName=Users
+      - MongoDBSettings__OrderCollectionName=Orders
+      - MongoDBSettings__InventoryCollectionName=Inventory
+      - MongoDBSettings__NotificationCollectionName=Notifications
+      - MongoDBSettings__PaymentCollectionName=Payments
+      - KafkaSettings__BootstrapServers=kafka:9093
+    networks:
+      - order-management-network
+
+networks:
+  order-management-network:
+    driver: bridge
 
 volumes:
   mongodb_data:

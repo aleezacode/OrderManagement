@@ -16,6 +16,11 @@ public static class DatabaseSeeder
     private static async Task SeedProductsAsync(IMongoDatabase database)
     {
         var collection = database.GetCollection<Product>("Products");
+        var existingProducts = await collection.Find(_ => true).ToListAsync();
+        if (existingProducts.Count > 0)
+        {
+            return; // Products already seeded
+        }
 
         var count = await collection.CountDocumentsAsync(_ => true);
         if (count == 0)
@@ -35,6 +40,11 @@ public static class DatabaseSeeder
     private static async Task SeedInventoryAsync(IMongoDatabase database)
     {
         var collection = database.GetCollection<Inventory>("Inventory");
+        var existingInventory = await collection.Find(_ => true).ToListAsync();
+        if (existingInventory.Count > 0)
+        {
+            return; // Inventory already seeded
+        }
 
         var count = await collection.CountDocumentsAsync(_ => true);
         if (count == 0)
@@ -54,6 +64,11 @@ public static class DatabaseSeeder
     private static async Task SeedUsersAsync(IMongoDatabase database)
     {
         var collection = database.GetCollection<User>("Users");
+        var existingUsers = await collection.Find(_ => true).ToListAsync();
+        if (existingUsers.Count > 0)
+        {
+            return; // Users already seeded
+        }
 
         var count = await collection.CountDocumentsAsync(_ => true);
         if (count == 0)

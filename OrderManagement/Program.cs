@@ -5,7 +5,6 @@ using OrderManagement.Repositories;
 using OrderManagement.Models;
 using OrderManagement.Kafka;
 using OrderManagement.Consumers;
-using Confluent.Kafka;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,13 +32,15 @@ builder.Services.AddScoped<IRepository<Product>, ProductRepository>();
 builder.Services.AddSingleton<IEventProducer, KafkaEventProducer>();
 
 // Register MediatR
-builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
-//Not able to run consumer and api at the same time
-builder.Services.AddHostedService<OrderPlacedConsumer>();
+
+//builder.Services.AddHostedService<OrderPlacedConsumer>();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
+
 
 var app = builder.Build();
 
@@ -49,19 +50,16 @@ using (var scope = app.Services.CreateScope())
     await DatabaseSeeder.SeedAsync(db);
 }
 
-// Configure the HTTP request pipeline
-if (app.Environment.IsDevelopment())
+app.UseSwagger();
+app.UseSwaggerUI(c =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI(c =>
-    {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "OrderManagement API V1");
-        c.RoutePrefix = string.Empty;
-    });
-}
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "OrderManagement API V1");
+    c.RoutePrefix = string.Empty;
+});
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 app.UseAuthorization();
+app.UseRouting();
 app.MapControllers();
 
 app.Run();
