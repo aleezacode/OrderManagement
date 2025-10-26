@@ -13,9 +13,9 @@ namespace OrderManagementTests
     {
         private readonly OrderRepository _orderRepository;
 
-        public OrderRepositoryTest() : base()
+        public OrderRepositoryTest() : base("Orders")
         {
-            _orderRepository = new OrderRepository(GetMongoDBSettingsOptions());
+            _orderRepository = new OrderRepository(_mongoDBSettings);
         }
 
         [Fact]

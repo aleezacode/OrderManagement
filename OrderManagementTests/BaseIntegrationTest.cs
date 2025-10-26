@@ -1,33 +1,28 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
+using Mongo2Go;
 using MongoDB.Driver;
 using OrderManagement.Configuration;
 
 namespace OrderManagementTests;
 
-public class BaseIntegrationTest
+public class BaseIntegrationTest : IDisposable
 {
-    protected readonly IMongoDatabase mongoDatabase;
-    protected readonly IMongoClient mongoClient;
-    protected readonly MongoDBSettings mongoDBSettings;
-
-    protected BaseIntegrationTest()
+    protected readonly MongoDbRunner _mongoRunner;
+    protected readonly IOptions<MongoDBSettings> _mongoDBSettings;
+    protected BaseIntegrationTest(string collectionName)
     {
-        var configuration = new ConfigurationBuilder()
-            .SetBasePath(Directory.GetCurrentDirectory())
-            .AddJsonFile("appsettings.Test.json")
-            .Build();
-
-        mongoDBSettings = new MongoDBSettings();
-        configuration.GetSection("MongoDBSettings").Bind(mongoDBSettings);
-
-        mongoClient = new MongoClient(mongoDBSettings.ConnectionString);
-        mongoDatabase = mongoClient.GetDatabase(mongoDBSettings.DatabaseName);
+        _mongoRunner = MongoDbRunner.Start();
+        _mongoDBSettings = Options.Create(new MongoDBSettings
+        {
+            ConnectionString = _mongoRunner.ConnectionString,
+            DatabaseName = "OrderManagementTestDb",
+            OrdersCollectionName = collectionName
+        });
     }
 
-    protected IOptions<MongoDBSettings> GetMongoDBSettingsOptions()
+    public void Dispose()
     {
-        var options = Options.Create(mongoDBSettings);
-        return options;
+        _mongoRunner.Dispose();
     }
 }
