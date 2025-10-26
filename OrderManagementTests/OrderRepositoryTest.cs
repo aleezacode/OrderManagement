@@ -19,7 +19,7 @@ namespace OrderManagementTests
         }
 
         [Fact]
-        public async Task CreateOrder_ShouldReturnCreatedOrder()
+        public async Task CreateOrderOK()
         {
             var order = new Order
             {
@@ -41,7 +41,7 @@ namespace OrderManagementTests
         }
 
         [Fact]
-        public async Task GetOrderById_ShouldReturnOrder()
+        public async Task GetOrderByIdOK()
         {
             var order = new Order
             {
@@ -50,7 +50,7 @@ namespace OrderManagementTests
                 TotalAmount = 59.98m,
                 OrderStatus = OrderStatus.Placed,
             };
-            order.Item =new OrderItem
+            order.Item = new OrderItem
             {
                 ProductId = "de3dd781d59dffe74f38fec8",
                 Quantity = 2,
@@ -61,6 +61,50 @@ namespace OrderManagementTests
             var fetchedOrder = await _orderRepository.GetByIdAsync(order.Id);
             Assert.NotNull(fetchedOrder);
             Assert.Equal(order.Id, fetchedOrder.Id);
+        }
+
+        [Fact]
+        public async Task DeleteOrderOK()
+        {
+            var order = new Order
+            {
+                OrderNumber = Guid.NewGuid(),
+                UserId = "68f683373d57a355d5e95ab2",
+                TotalAmount = 59.98m,
+                OrderStatus = OrderStatus.Placed,
+            };
+            order.Item = new OrderItem
+            {
+                ProductId = "de3dd781d59dffe74f38fec8",
+                Quantity = 2,
+                UnitPrice = 29.99m
+            };
+
+            await _orderRepository.CreateAsync(order);
+            var deleteResult = await _orderRepository.DeleteAsync(order.Id);
+            Assert.True(deleteResult);
+        }
+
+        [Fact]
+        public async Task UpdateOrderOK()
+        {
+            var order = new Order
+            {
+                OrderNumber = Guid.NewGuid(),
+                UserId = "68f683373d57a355d5e95ab2",
+                TotalAmount = 59.98m,
+                OrderStatus = OrderStatus.Placed,
+            };
+            order.Item = new OrderItem
+            {
+                ProductId = "de3dd781d59dffe74f38fec8",
+                Quantity = 2,
+                UnitPrice = 29.99m
+            };
+            await _orderRepository.CreateAsync(order);
+            order.OrderStatus = OrderStatus.Failed;
+            var updateResult = await _orderRepository.UpdateAsync(order.Id, order);
+            Assert.True(updateResult);
         }
     }
 }

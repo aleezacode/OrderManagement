@@ -14,8 +14,8 @@ namespace OrderManagement.Models
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
         public string? Id { get; set; }
-        [BsonRepresentation(BsonType.ObjectId)]
-        public required string OrderId { get; set; }
+        [BsonRepresentation(BsonType.String)]
+        public required Guid OrderNumber { get; set; }
         [BsonRepresentation(BsonType.ObjectId)]
         public required string UserId { get; set; }
         public decimal Amount { get; set; }

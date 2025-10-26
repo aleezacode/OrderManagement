@@ -22,16 +22,16 @@ namespace OrderManagement.Repositories
             _inventoryCollection = mongoDatabase.GetCollection<Inventory>(mongoDBSettings.Value.InventoryCollectionName);
         }
 
+        //Will not be used
         public async Task<Inventory> CreateAsync(Inventory entity)
         {
-            await _inventoryCollection.InsertOneAsync(entity);
-            return entity;
+            throw new NotImplementedException();
         }
 
+        //Will not be used
         public async Task<bool> DeleteAsync(string id)
         {
-            return await _inventoryCollection.DeleteOneAsync(i => i.Id == id)
-                .ContinueWith(task => task.Result.DeletedCount > 0);
+            throw new NotImplementedException();
         }
 
         public async Task<Inventory?> FindOneAsync(Expression<Func<Inventory, bool>> predicate)
