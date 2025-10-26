@@ -14,7 +14,7 @@ namespace OrderManagement.Consumers
         private readonly IServiceProvider _serviceProvider;
         public OrderPlacedConsumer(IServiceProvider serviceProvider) : base(new ConsumerConfig
         {
-            BootstrapServers = "localhost:9092",
+            BootstrapServers = "kafka:9093",
             GroupId = "order-management-group",
             AutoOffsetReset = AutoOffsetReset.Earliest
         }, "orders")

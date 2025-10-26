@@ -33,7 +33,7 @@ builder.Services.AddSingleton<IEventProducer, KafkaEventProducer>();
 
 // Register MediatR
 
-//builder.Services.AddHostedService<OrderPlacedConsumer>();
+builder.Services.AddHostedService<OrderPlacedConsumer>();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();

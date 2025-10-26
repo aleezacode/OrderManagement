@@ -24,35 +24,39 @@ namespace OrderManagement.Consumers
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            _consumer.Subscribe(_topicName);
 
             try
             {
-                while (!stoppingToken.IsCancellationRequested)
-                {
-                    var result = _consumer.Consume(stoppingToken);
-                    if (result?.Message != null)
-                    {
-                        try
-                        {
-                            var message = JsonSerializer.Deserialize<TEvent>(result.Message.Value);
-                            if (message != null)
-                            {
-                                await ProcessEventAsync(message, stoppingToken);
-                                _consumer.Commit(result);
-                            }
-                        }
-                        catch (System.Exception)
-                        {
-                            throw;
-                        }
-                    }
-                }
+                _consumer.Subscribe(_topicName);
             }
-            finally
+            catch (System.Exception)
             {
-                _consumer.Close();
+                return;
             }
+
+            while (!stoppingToken.IsCancellationRequested)
+            {
+        try
+        {
+            var result = _consumer.Consume(stoppingToken);
+            if (result?.Message?.Value == null) continue;
+
+            var ev = JsonSerializer.Deserialize<TEvent>(result.Message.Value);
+            if (ev != null)
+                await ProcessEventAsync(ev, stoppingToken);
+        }
+        catch (ConsumeException ce)
+        {
+            await Task.Delay(1000, stoppingToken);
+        }
+        catch (OperationCanceledException) { }
+        catch (Exception ex)
+        {
+            await Task.Delay(1000, stoppingToken);
+        }
+            }
+
+            _consumer.Close();
         }
 
         protected abstract Task ProcessEventAsync(TEvent @event, CancellationToken cancellationToken);
