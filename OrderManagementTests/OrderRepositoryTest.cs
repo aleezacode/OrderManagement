@@ -8,7 +8,6 @@ using OrderManagement.Repositories;
 
 namespace OrderManagementTests
 {
-    //TODO: Add tests for other CRUD operations as well (Add tests for other repos)
     public class OrderRepositoryTest : BaseIntegrationTest
     {
         private readonly OrderRepository _orderRepository;
