@@ -33,7 +33,7 @@ namespace OrderManagement.Consumers
                 Quantity = @event.Item.Quantity
             };
             
-            await mediator.Send(new ReserveStockCommand(@event.OrderNumber, reservedItem), cancellationToken);
+            await mediator.Send(new ReserveStockCommand(@event.OrderId, reservedItem), cancellationToken);
         }
     }
 }

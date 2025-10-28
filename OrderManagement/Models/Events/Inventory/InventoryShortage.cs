@@ -7,7 +7,7 @@ namespace OrderManagement.Models.Events.Inventory
 {
     public class InventoryShortage : IEvent
     {
-        public Guid OrderNumber { get; set; }
+        public string OrderId { get; set; } 
         public string ProductId { get; set; }
         public int RequestedQuantity { get; set; }
         public int AvailableQuantity { get; set; }

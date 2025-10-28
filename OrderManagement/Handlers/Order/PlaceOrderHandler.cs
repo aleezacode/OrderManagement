@@ -44,16 +44,16 @@ namespace OrderManagement.Handlers.Order
 
             var orderPlacedEvent = new OrderPlaced
             {
-            OrderNumber = insertedOrder.OrderNumber,
-            UserId = order.UserId,
-            Item = new OrderItemEvent
-            {
-                ProductId = order.Item.ProductId,
-                Quantity = order.Item.Quantity,
-                UnitPrice = order.Item.UnitPrice
-            },
-            TotalAmount = order.TotalAmount
-            };
+                OrderId = insertedOrder.Id,
+                UserId = order.UserId,
+                Item = new OrderItemEvent
+                {
+                    ProductId = order.Item.ProductId,
+                    Quantity = order.Item.Quantity,
+                    UnitPrice = order.Item.UnitPrice
+                },
+                TotalAmount = order.TotalAmount
+                };
 
             await _eventProducer.ProduceAsync("orders", orderPlacedEvent, cancellationToken);
 

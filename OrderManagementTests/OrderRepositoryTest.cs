@@ -23,7 +23,6 @@ namespace OrderManagementTests
         {
             var order = new Order
             {
-                OrderNumber = Guid.NewGuid(),
                 UserId = "68f683373d57a355d5e95ab2",
                 TotalAmount = 59.98m,
                 OrderStatus = OrderStatus.Placed,
@@ -45,7 +44,6 @@ namespace OrderManagementTests
         {
             var order = new Order
             {
-                OrderNumber = Guid.NewGuid(),
                 UserId = "68f683373d57a355d5e95ab2",
                 TotalAmount = 59.98m,
                 OrderStatus = OrderStatus.Placed,
@@ -68,7 +66,6 @@ namespace OrderManagementTests
         {
             var order = new Order
             {
-                OrderNumber = Guid.NewGuid(),
                 UserId = "68f683373d57a355d5e95ab2",
                 TotalAmount = 59.98m,
                 OrderStatus = OrderStatus.Placed,
@@ -90,7 +87,6 @@ namespace OrderManagementTests
         {
             var order = new Order
             {
-                OrderNumber = Guid.NewGuid(),
                 UserId = "68f683373d57a355d5e95ab2",
                 TotalAmount = 59.98m,
                 OrderStatus = OrderStatus.Placed,
