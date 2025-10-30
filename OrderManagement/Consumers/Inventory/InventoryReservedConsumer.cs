@@ -7,7 +7,7 @@ using MediatR;
 using OrderManagement.Commands.Notification;
 using OrderManagement.Models.Events.Inventory;
 
-namespace OrderManagement.Consumers
+namespace OrderManagement.Consumers.Inventory
 {
     public class InventoryReservedConsumer : BaseConsumer<InventoryReserved>
     {

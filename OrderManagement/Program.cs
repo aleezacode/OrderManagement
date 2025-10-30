@@ -4,7 +4,8 @@ using MediatR;
 using OrderManagement.Repositories;
 using OrderManagement.Models;
 using OrderManagement.Kafka;
-using OrderManagement.Consumers;
+using OrderManagement.Consumers.Order;
+using OrderManagement.Consumers.Inventory;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,11 +30,13 @@ builder.Services.AddScoped<IRepository<Inventory>, InventoryRepository>();
 builder.Services.AddScoped<IRepository<Payment>, PaymentRepository>();
 builder.Services.AddScoped<IRepository<Notification>, NotificationRepository>();
 builder.Services.AddScoped<IRepository<Product>, ProductRepository>();
+builder.Services.AddScoped<IRepository<EventPublishlog>, EventPublishlogRepository>();
 builder.Services.AddSingleton<IEventProducer, KafkaEventProducer>();
 
 // Register MediatR
 
 builder.Services.AddHostedService<OrderPlacedConsumer>();
+builder.Services.AddHostedService<InventoryReservedConsumer>();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();

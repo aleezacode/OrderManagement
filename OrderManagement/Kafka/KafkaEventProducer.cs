@@ -3,15 +3,20 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Confluent.Kafka;
+using OrderManagement.Repositories;
+using OrderManagement.Models;
 
 namespace OrderManagement.Kafka
 {
     public class KafkaEventProducer : IEventProducer, IDisposable
     {
+        private readonly IRepository<EventPublishlog> _eventPublishlogRepository;
         private readonly IProducer<string, string> _producer;
 
-        public KafkaEventProducer(IConfiguration configuration)
+        public KafkaEventProducer(IConfiguration configuration, IRepository<EventPublishlog> eventPublishlogRepository)
         {
+            _eventPublishlogRepository = eventPublishlogRepository;
+
             var config = new ProducerConfig
             {
                 BootstrapServers = configuration["Kafka:BootstrapServers"],
@@ -33,6 +38,16 @@ namespace OrderManagement.Kafka
             };
 
             await _producer.ProduceAsync(topic, message, cancellationToken);
+
+            var eventPublishlog = new EventPublishlog()
+            {
+                OrderId = (@event as dynamic).OrderId,
+                EventType = @event!.GetType().Name,
+                EventMessage = message.Value,
+                PublishedAt = DateTime.UtcNow
+            };
+
+            await _eventPublishlogRepository.CreateAsync(eventPublishlog);
         }
 
         public void Dispose()

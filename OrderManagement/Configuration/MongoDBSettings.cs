@@ -15,5 +15,6 @@ namespace OrderManagement.Configuration
         public string NotificationsCollectionName { get; set; } = "Notifications";
         public string ProductsCollectionName { get; set; } = "Products";
         public string UsersCollectionName { get; set; } = "Users";
+        public string EventPublishLogCollectionName { get; set; } = "EventPublishLogs"; 
     }
 }

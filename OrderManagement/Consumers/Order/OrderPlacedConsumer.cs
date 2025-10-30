@@ -7,7 +7,7 @@ using MediatR;
 using OrderManagement.Models.Events.Orders;
 using OrderManagement.Commands.Inventory;
 
-namespace OrderManagement.Consumers
+namespace OrderManagement.Consumers.Order
 {
     public class OrderPlacedConsumer : BaseConsumer<OrderPlaced>
     {
