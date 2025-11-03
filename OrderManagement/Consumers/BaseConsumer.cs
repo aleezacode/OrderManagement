@@ -11,60 +11,69 @@ namespace OrderManagement.Consumers
 {
     public abstract class BaseConsumer<TEvent> : BackgroundService where TEvent : class, IEvent
     {
-        private readonly IConsumer<string, string> _consumer;
         private readonly string _topicName;
+        private readonly ConsumerConfig _consumerConfig;
 
         public BaseConsumer(ConsumerConfig config, string topicName)
         {
             _topicName = topicName;
-
-            var builder = new ConsumerBuilder<string, string>(config);
-            _consumer = builder.Build();
+            _consumerConfig = config;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            await Task.Delay(3000, stoppingToken);
+            using var consumer = new ConsumerBuilder<string, string>(_consumerConfig).Build();
+            var subscribed = false;
 
-            try
+            while (!stoppingToken.IsCancellationRequested && !subscribed)
             {
-                _consumer.Subscribe(_topicName);
+                try
+                {
+                    consumer.Subscribe(_topicName);
+                    subscribed = true;
+                }
+                catch (KafkaException ex)
+                {
+                    Console.WriteLine("Kafka not ready");
+                    await Task.Delay(500, stoppingToken);
+                }
             }
-            catch (System.Exception)
-            {
-                return;
-            }
+
+            await Task.Yield();
 
             while (!stoppingToken.IsCancellationRequested)
             {
-        try
-        {
-            var result = _consumer.Consume(stoppingToken);
-            if (result?.Message?.Value == null) continue;
+                try
+                {
+                    var result = consumer.Consume(stoppingToken);
+                    if (result.Message.Value == null) continue;
 
-            var ev = JsonSerializer.Deserialize<TEvent>(result.Message.Value);
-            if (ev != null)
-                await ProcessEventAsync(ev, stoppingToken);
-        }
-        catch (ConsumeException ce)
-        {
-            await Task.Delay(1000, stoppingToken);
-        }
-        catch (OperationCanceledException) { }
-        catch (Exception ex)
-        {
-            await Task.Delay(1000, stoppingToken);
-        }
+                    var ev = JsonSerializer.Deserialize<TEvent>(result.Message.Value);
+                    if (ev != null)
+                    {
+                        await ProcessEventAsync(ev, stoppingToken);
+                    }
+                }
+                catch (ConsumeException cEx)
+                {
+                    Console.WriteLine("Consumption error");
+                    await Task.Delay(1000, stoppingToken);
+                }
+                catch (OperationCanceledException)
+                {
+
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Unexpected error");
+                    await Task.Delay(2000, stoppingToken);
+                }
             }
 
-            _consumer.Close();
+            consumer.Close();
         }
 
         protected abstract Task ProcessEventAsync(TEvent @event, CancellationToken cancellationToken);
-
-        public override void Dispose()
-        {
-            _consumer?.Dispose();
-            base.Dispose();
-        }
     }
 }

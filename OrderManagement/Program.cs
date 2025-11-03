@@ -9,6 +9,15 @@ using OrderManagement.Consumers.Inventory;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Core framework services
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+// MediatR
+builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
+
+// Mongo setup
 builder.Services.Configure<MongoDBSettings>(
     builder.Configuration.GetSection("MongoDBSettings"));
 
@@ -25,6 +34,7 @@ builder.Services.AddSingleton<IMongoDatabase>(sp =>
     return client.GetDatabase(settings.DatabaseName);
 });
 
+// Repositories & producer
 builder.Services.AddScoped<IRepository<Order>, OrderRepository>();
 builder.Services.AddScoped<IRepository<Inventory>, InventoryRepository>();
 builder.Services.AddScoped<IRepository<Payment>, PaymentRepository>();
@@ -33,26 +43,24 @@ builder.Services.AddScoped<IRepository<Product>, ProductRepository>();
 builder.Services.AddScoped<IRepository<EventPublishlog>, EventPublishlogRepository>();
 builder.Services.AddSingleton<IEventProducer, KafkaEventProducer>();
 
-// Register MediatR
-
+// Kafka consumers
 builder.Services.AddHostedService<OrderPlacedConsumer>();
 builder.Services.AddHostedService<InventoryReservedConsumer>();
 
-builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
-
-
+Console.WriteLine("Before build");
 var app = builder.Build();
+Console.WriteLine("After Build");
 
+// Mongo seeding
 using (var scope = app.Services.CreateScope())
 {
+    Console.WriteLine("Before seeding");
     var db = scope.ServiceProvider.GetRequiredService<IMongoDatabase>();
     await DatabaseSeeder.SeedAsync(db);
+    Console.WriteLine("After seeding");
 }
 
+// Swagger
 app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
@@ -60,9 +68,11 @@ app.UseSwaggerUI(c =>
     c.RoutePrefix = string.Empty;
 });
 
-//app.UseHttpsRedirection();
-app.UseAuthorization();
+// Middleware order
 app.UseRouting();
+app.UseAuthorization();
+
 app.MapControllers();
 
-app.Run();
+Console.WriteLine("Before App run");
+await app.RunAsync();

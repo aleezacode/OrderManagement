@@ -14,8 +14,8 @@ namespace OrderManagement.Consumers.Inventory
         private readonly IServiceProvider _serviceProvider;
         public InventoryReservedConsumer(IServiceProvider serviceProvider) : base(new ConsumerConfig
         {
-            BootstrapServers = "kafka:9093",
-            GroupId = "order-management-group",
+            BootstrapServers = "kafka:9092",
+            GroupId = "inventory-service",
             AutoOffsetReset = AutoOffsetReset.Earliest
         }, "inventory")
         {

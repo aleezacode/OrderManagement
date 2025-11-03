@@ -21,7 +21,7 @@ namespace OrderManagement.Kafka
             {
                 BootstrapServers = configuration["Kafka:BootstrapServers"],
                 Acks = Acks.All,
-                EnableIdempotence = true,
+                EnableIdempotence = false,
                 LingerMs = 5,
                 MessageTimeoutMs = 30000
             };

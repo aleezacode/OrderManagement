@@ -30,31 +30,21 @@ services:
     depends_on:
       - zookeeper
     ports:
-      - "9092:9092"  # External access (from host)
-      - "9093:9093"  # Internal communication (from other containers)
+      - "9092:9092"
+    volumes:
+      - kafka_data:/var/lib/kafka/data
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-
-      # 👇 Define listeners for internal & external traffic
-      KAFKA_LISTENERS: INTERNAL://0.0.0.0:9093,EXTERNAL://0.0.0.0:9092
-
-      # 👇 Advertise internal DNS name (service name) + external host (localhost)
-      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:9093,EXTERNAL://localhost:9092
-
-      # 👇 Map listener names to protocol
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
-
-      # 👇 Kafka will use INTERNAL listener for broker communication
-      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
-
-      # 👇 Single-broker dev environment settings
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
-
     healthcheck:
-      test: ["CMD", "bash", "-c", "nc -z localhost 9092"]
+      test: ["CMD", "bash", "-c", "kafka-topics --bootstrap-server localhost:9092 --list > /dev/null 2>&1"]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -77,7 +67,7 @@ services:
           connections:
             local:
               properties:
-                bootstrap.servers: "kafka:9093"
+                bootstrap.servers: "kafka:9092"
     networks:
       - order-management-network
 
@@ -101,7 +91,7 @@ services:
       - MongoDBSettings__InventoryCollectionName=Inventory
       - MongoDBSettings__NotificationCollectionName=Notifications
       - MongoDBSettings__PaymentCollectionName=Payments
-      - KafkaSettings__BootstrapServers=kafka:9093
+      - KafkaSettings__BootstrapServers=kafka:9092
     networks:
       - order-management-network
 
@@ -111,3 +101,4 @@ networks:
 
 volumes:
   mongodb_data:
+  kafka_data: 
