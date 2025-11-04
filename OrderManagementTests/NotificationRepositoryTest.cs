@@ -21,6 +21,7 @@ namespace OrderManagementTests
             var notification = new Notification
             {
                 UserId = "64a7f0c2e1b8c8f5d6a4e9b3",
+                OrderId = "64a7f0c2e1b8c8f5d6a4e9c4",
                 Message = "Your order has been shipped.",
                 Type = Type.SMS,
                 Status = NotificationStatus.Sent
@@ -32,6 +33,7 @@ namespace OrderManagementTests
             Assert.Equal(notification.Message, createdNotification.Message);
             Assert.Equal(notification.Type, createdNotification.Type);
             Assert.Equal(notification.Status, createdNotification.Status);
+            Assert.Equal(notification.OrderId, createdNotification.OrderId);
         }
 
         [Fact]
@@ -40,6 +42,7 @@ namespace OrderManagementTests
             var notification = new Notification
             {
                 UserId = "64a7f0c2e1b8c8f5d6a4e9b4",
+                OrderId = "64a7f0c2e1b8c8f5d6a4e9c4",
                 Message = "Your payment was successful.",
                 Type = Type.Email,
                 Status = NotificationStatus.Pending
@@ -54,6 +57,7 @@ namespace OrderManagementTests
             Assert.Equal(createdNotification.Message, fetchedNotification.Message);
             Assert.Equal(createdNotification.Type, fetchedNotification.Type);
             Assert.Equal(createdNotification.Status, fetchedNotification.Status);
+            Assert.Equal(createdNotification.OrderId, fetchedNotification.OrderId);
         }
 
         [Fact]
@@ -62,6 +66,7 @@ namespace OrderManagementTests
             var notification = new Notification
             {
                 UserId = "64a7f0c2e1b8c8f5d6a4e9b5",
+                OrderId = "64a7f0c2e1b8c8f5d6a4e9c4",
                 Message = "Your order is out for delivery.",
                 Type = Type.SMS,
                 Status = NotificationStatus.Pending
@@ -84,6 +89,7 @@ namespace OrderManagementTests
             var notification = new Notification
             {
                 UserId = "64a7f0c2e1b8c8f5d6a4e9b6",
+                OrderId = "64a7f0c2e1b8c8f5d6a4e9c4",
                 Message = "Your subscription has been renewed.",
                 Type = Type.Email,
                 Status = NotificationStatus.Sent

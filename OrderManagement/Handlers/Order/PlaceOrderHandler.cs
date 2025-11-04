@@ -57,7 +57,7 @@ namespace OrderManagement.Handlers.Order
 
             await _eventProducer.ProduceAsync("orders", orderPlacedEvent, cancellationToken);
 
-            return insertedOrder.Id.ToString();
+            return insertedOrder.Id!;
         }
 
         private async Task<OrderItemModel> BuildeOrderItems(Commands.Order.OrderItem item)

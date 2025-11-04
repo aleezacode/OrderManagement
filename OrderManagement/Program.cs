@@ -40,6 +40,7 @@ builder.Services.AddScoped<IRepository<Inventory>, InventoryRepository>();
 builder.Services.AddScoped<IRepository<Payment>, PaymentRepository>();
 builder.Services.AddScoped<IRepository<Notification>, NotificationRepository>();
 builder.Services.AddScoped<IRepository<Product>, ProductRepository>();
+builder.Services.AddScoped<IRepository<User>, UserRepository>();
 builder.Services.AddScoped<IRepository<EventPublishlog>, EventPublishlogRepository>();
 builder.Services.AddSingleton<IEventProducer, KafkaEventProducer>();
 

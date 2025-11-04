@@ -14,6 +14,8 @@ namespace OrderManagement.Models
         public string? Id { get; set; }
         [BsonRepresentation(BsonType.ObjectId)]
         public required string UserId { get; set; }
+        [BsonRepresentation(BsonType.ObjectId)]
+        public required string OrderId { get; set; }
         public Type Type { get; set; }
         public required string Message { get; set; }
         public NotificationStatus Status { get; set; }

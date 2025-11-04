@@ -75,8 +75,8 @@ public static class DatabaseSeeder
         {
             var users = new List<User>
             {
-                new() { Email = "test1@example.com", FullName = "John Doe"},
-                new() { Email = "test2@example.com", FullName = "Jane Smith" }
+                new() { Email = "test1@example.com", FullName = "John Doe", NotificationType = Type.SMS},
+                new() { Email = "test2@example.com", FullName = "Jane Smith", NotificationType = Type.Email}
             };
 
             await collection.InsertManyAsync(users);

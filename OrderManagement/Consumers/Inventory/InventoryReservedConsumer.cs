@@ -29,7 +29,8 @@ namespace OrderManagement.Consumers.Inventory
 
             var notificationCommand = new SendNotificationCommand
             {
-
+                OrderId = @event.OrderId,
+                Message = @event.Reason
             };
             
             await mediator.Send(notificationCommand, cancellationToken);
