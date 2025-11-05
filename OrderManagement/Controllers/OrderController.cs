@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using OrderManagement.Commands.Order.Cancellation;
 using OrderManagement.Commands.Order;
 using OrderManagement.Requests;
 
@@ -34,6 +35,15 @@ namespace OrderManagement.Controllers
 
             var orderId = await _mediator.Send(placeOrderCommand);
             return Ok(new { OrderId = orderId });
+        }
+
+        [HttpPut("cancel")]
+        public async Task<IActionResult> CancelOrder([FromBody] CancelOrderRequest request)
+        {
+            var cancelOrderCommand = new CancelOrderByUserCommand(request.OrderId, request.Reason);
+
+            var cancelled = await _mediator.Send(cancelOrderCommand);
+            return Ok(cancelled);
         }
     }
 }

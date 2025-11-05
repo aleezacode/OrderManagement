@@ -51,6 +51,8 @@ namespace OrderManagement.Repositories
         public async Task<bool> UpdateAsync(string id, Order entity)
         {
             entity.Id = id;
+            entity.UpdatedAt = DateTime.UtcNow;
+
             return await _orderCollection.ReplaceOneAsync(o => o.Id == id, entity)
                 .ContinueWith(task => task.Result.ModifiedCount > 0);
         }

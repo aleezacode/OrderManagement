@@ -41,13 +41,25 @@ namespace OrderManagement.Kafka
 
             var eventPublishlog = new EventPublishlog()
             {
-                OrderId = (@event as dynamic).OrderId,
+                OrderId = GetOrderId(@event),
                 EventType = @event!.GetType().Name,
                 EventMessage = message.Value,
                 PublishedAt = DateTime.UtcNow
             };
 
             await _eventPublishlogRepository.CreateAsync(eventPublishlog);
+        }
+
+        private string? GetOrderId(object @event)
+        {
+            try
+            {
+                return (@event as dynamic)?.OrderId;
+            }
+            catch (Exception)
+            {
+                return null;
+            }
         }
 
         public void Dispose()

@@ -6,6 +6,7 @@ using Confluent.Kafka;
 using MediatR;
 using System.Text.Json;
 using OrderManagement.Models.Events;
+using Microsoft.Extensions.Logging; 
 
 namespace OrderManagement.Consumers
 {
@@ -13,11 +14,13 @@ namespace OrderManagement.Consumers
     {
         private readonly string _topicName;
         private readonly ConsumerConfig _consumerConfig;
+        private readonly ILogger _logger;
 
-        public BaseConsumer(ConsumerConfig config, string topicName)
+        public BaseConsumer(ConsumerConfig config, string topicName, ILogger logger)
         {
             _topicName = topicName;
             _consumerConfig = config;
+            _logger = logger;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -32,10 +35,11 @@ namespace OrderManagement.Consumers
                 {
                     consumer.Subscribe(_topicName);
                     subscribed = true;
+                    _logger.LogInformation($"Successfully subscribed to topic: {_topicName}");
                 }
                 catch (KafkaException ex)
                 {
-                    Console.WriteLine("Kafka not ready");
+                    _logger.LogWarning(ex, $"Kafka not ready. Retrying subscription to topic: {_topicName}");
                     await Task.Delay(500, stoppingToken);
                 }
             }
@@ -52,26 +56,36 @@ namespace OrderManagement.Consumers
                     var ev = JsonSerializer.Deserialize<TEvent>(result.Message.Value);
                     if (ev != null)
                     {
-                        await ProcessEventAsync(ev, stoppingToken);
+                        consumer.Commit(result);
+
+                        try
+                        {
+                            await ProcessEventAsync(ev, stoppingToken);
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError(ex, $"Error processing event of type: {typeof(TEvent).Name}");
+                        }
                     }
                 }
                 catch (ConsumeException cEx)
                 {
-                    Console.WriteLine("Consumption error");
+                    _logger.LogError(cEx, $"Consumption error for topic: {_topicName}");
                     await Task.Delay(1000, stoppingToken);
                 }
                 catch (OperationCanceledException)
                 {
-
+                    _logger.LogInformation($"Consumer operation cancelled for topic: {_topicName}");
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine("Unexpected error");
+                    _logger.LogError(ex, $"Unexpected error for consumer topic {_topicName}");
                     await Task.Delay(2000, stoppingToken);
                 }
             }
 
             consumer.Close();
+            _logger.LogInformation($"Consumer closed for topic: {_topicName}");
         }
 
         protected abstract Task ProcessEventAsync(TEvent @event, CancellationToken cancellationToken);

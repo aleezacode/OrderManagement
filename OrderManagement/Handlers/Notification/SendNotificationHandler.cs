@@ -16,45 +16,67 @@ namespace OrderManagement.Handlers.Notification
         private readonly IRepository<NotificationModel> _notificationRepository;
         private readonly IRepository<User> _userRepository;
         private readonly IEventProducer _eventProducer;
-        public SendNotificationHandler(IRepository<OrderModel> orderRepository, IRepository<NotificationModel> notificationRepository, IRepository<User> userRepository, IEventProducer eventProducer)
+        private readonly ILogger<SendNotificationHandler> _logger;
+        public SendNotificationHandler(IRepository<OrderModel> orderRepository, IRepository<NotificationModel> notificationRepository, IRepository<User> userRepository, IEventProducer eventProducer, ILogger<SendNotificationHandler> logger)
         {
             _orderRepository = orderRepository;
             _notificationRepository = notificationRepository;
             _userRepository = userRepository;
             _eventProducer = eventProducer;
+            _logger = logger;
         }
         public async Task<string> Handle(SendNotificationCommand request, CancellationToken cancellationToken)
         {
-            var order = await _orderRepository.GetByIdAsync(request.OrderId);
-            var user = await _userRepository.GetByIdAsync(order.UserId);
-            //TODO: Improve error handling
-            if (order == null) throw new Exception();
-            if (user == null) throw new Exception();
-
-            var notification = new NotificationModel()
+            try
             {
-                UserId = user.Id,
-                OrderId = order.Id,
-                Type = user.NotificationType,
-                //TODO: Make the Message from the original message to an enum and then map it
-                Message = request.Message,
-                Status = NotificationStatus.Sent
-            };
+                _logger.LogInformation($"Handling SendNotificationCommand for order: {request.OrderId}");
+                var order = await _orderRepository.GetByIdAsync(request.OrderId);
+                var user = await _userRepository.GetByIdAsync(order.UserId);
+                //TODO: Improve error handling
+                if (order == null)
+                {
+                    _logger.LogError($"Order with id {request.OrderId} does not exist");
+                    throw new Exception();
+                }
+                if (user == null)
+                {
+                    _logger.LogError($"User with id {order.UserId} does not exist");
+                    throw new Exception();
+                } 
 
-            await _notificationRepository.CreateAsync(notification);
+                var notification = new NotificationModel()
+                {
+                    UserId = user.Id,
+                    OrderId = order.Id,
+                    Type = user.NotificationType,
+                    //TODO: Make the Message from the original message to an enum and then map it
+                    Message = request.Message,
+                    Status = NotificationStatus.Sent
+                };
 
-            var notificationSent = new NotificationSent()
+                await _notificationRepository.CreateAsync(notification);
+
+                var notificationSent = new NotificationSent()
+                {
+                    NotificationId = notification.Id,
+                    UserId = user.Id,
+                    OrderId = order.Id,
+                    Type = user.NotificationType.ToString(),
+                    Message = notification.Message,
+                    Status = notification.Status.ToString()
+                };
+
+                _logger.LogInformation($"Publishing NotificationSent event for order: {order.Id}");
+                await _eventProducer.ProduceAsync("notification-sent", notificationSent);
+                _logger.LogInformation($"Published NotificationSent event for order: {order.Id}");
+                
+                return notification.Id!;
+            }
+            catch (Exception ex)
             {
-                NotificationId = notification.Id,
-                UserId = user.Id,
-                OrderId = order.Id,
-                Type = user.NotificationType.ToString(),
-                Message = notification.Message,
-                Status = notification.Status.ToString()
-            };
-
-            await _eventProducer.ProduceAsync("notification", notificationSent);
-            return notification.Id!;
+                _logger.LogError(ex,$"Failed to handle SendNotification command for order: {request.OrderId}");
+                throw;
+            }
         }
     }
 }

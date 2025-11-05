@@ -15,7 +15,7 @@ namespace OrderManagement.Models
         [BsonRepresentation(BsonType.ObjectId)]
         public string? Id { get; set; }
         [BsonRepresentation(BsonType.ObjectId)]
-        public required string OrderId { get; set; }
+        public string? OrderId { get; set; }
         public string? EventType { get; set; }
         public string? EventMessage { get; set; }
         public required DateTime PublishedAt { get; set; }

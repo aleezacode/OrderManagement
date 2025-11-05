@@ -10,6 +10,7 @@ namespace OrderManagement.Models.Events
         public string OrderId { get; set; }
         public string UserId { get; set; }
         public string Reason { get; set; }
+        public string CancelledBy { get; set; }
         public DateTime Timestamp { get; set; } = DateTime.UtcNow;
     }
 }

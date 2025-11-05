@@ -6,34 +6,49 @@ using Confluent.Kafka;
 using MediatR;
 using OrderManagement.Commands.Notification;
 using OrderManagement.Models.Events.Inventory;
+using Microsoft.Extensions.Logging;
 
 namespace OrderManagement.Consumers.Inventory
 {
     public class InventoryReservedConsumer : BaseConsumer<InventoryReserved>
     {
         private readonly IServiceProvider _serviceProvider;
-        public InventoryReservedConsumer(IServiceProvider serviceProvider) : base(new ConsumerConfig
+        private readonly ILogger<InventoryReservedConsumer> _logger;
+        public InventoryReservedConsumer(IServiceProvider serviceProvider, ILogger<InventoryReservedConsumer> logger) : base(new ConsumerConfig
         {
             BootstrapServers = "kafka:9092",
-            GroupId = "inventory-service",
-            AutoOffsetReset = AutoOffsetReset.Earliest
-        }, "inventory")
+            GroupId = "notification-service",
+            AutoOffsetReset = AutoOffsetReset.Earliest,
+            EnableAutoCommit = true,
+            AutoCommitIntervalMs = 1000
+        }, "inventory-reserve", logger)
         {
             _serviceProvider = serviceProvider;
+            _logger = logger;
         }
 
         protected override async Task ProcessEventAsync(InventoryReserved @event, CancellationToken cancellationToken)
         {
-            using var scope = _serviceProvider.CreateScope();
-            var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
-
-            var notificationCommand = new SendNotificationCommand
+            try
             {
-                OrderId = @event.OrderId,
-                Message = @event.Reason
-            };
-            
-            await mediator.Send(notificationCommand, cancellationToken);
+                using var scope = _serviceProvider.CreateScope();
+                var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+
+                var notificationCommand = new SendNotificationCommand
+                {
+                    OrderId = @event.OrderId,
+                    Message = @event.Reason
+                };
+
+                _logger.LogInformation($"Sending reservedStock SendNotification command for order: {@event.OrderId}");
+                await mediator.Send(notificationCommand, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error processing InventoryReserved for order: {@event.OrderId}");
+                throw;
+            }
+
         }
     }
 }

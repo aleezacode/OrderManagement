@@ -52,6 +52,8 @@ namespace OrderManagement.Repositories
         public async Task<bool> UpdateAsync(string id, Inventory entity)
         {
             entity.Id = id;
+            entity.LastUpdatedAt = DateTime.UtcNow;
+            
             return await _inventoryCollection.ReplaceOneAsync(i => i.Id == id, entity)
                 .ContinueWith(task => task.Result.ModifiedCount > 0);
         }

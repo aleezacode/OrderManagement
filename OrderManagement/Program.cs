@@ -47,6 +47,8 @@ builder.Services.AddSingleton<IEventProducer, KafkaEventProducer>();
 // Kafka consumers
 builder.Services.AddHostedService<OrderPlacedConsumer>();
 builder.Services.AddHostedService<InventoryReservedConsumer>();
+builder.Services.AddHostedService<OrderCancelledConsumer>();
+builder.Services.AddHostedService<InventoryShortageConsumer>();
 
 Console.WriteLine("Before build");
 var app = builder.Build();
