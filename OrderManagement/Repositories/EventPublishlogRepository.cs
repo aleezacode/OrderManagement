@@ -9,6 +9,7 @@ using MongoDB.Driver;
 using MongoDB.Driver.Linq;
 using OrderManagement.Configuration;
 using OrderManagement.Models;
+using OrderManagement.Exceptions;
 
 namespace OrderManagement.Repositories
 {
@@ -24,8 +25,16 @@ namespace OrderManagement.Repositories
 
         public async Task<EventPublishlog> CreateAsync(EventPublishlog entity)
         {
-            await _eventPublishlogCollection.InsertOneAsync(entity);
-            return entity;
+            try
+            {
+                await _eventPublishlogCollection.InsertOneAsync(entity);
+                return entity;
+            }
+            catch (Exception ex)
+            {
+                throw new DocumentCreationFailedException("EventPublishLog", ex);
+            }
+            
         }
 
         //Will not be used
@@ -45,16 +54,21 @@ namespace OrderManagement.Repositories
             throw new NotImplementedException();
         }
 
-        public async Task<EventPublishlog?> GetByIdAsync(string id)
+        public async Task<EventPublishlog> GetByIdAsync(string id)
         {
-            return await _eventPublishlogCollection.Find(i => i.Id == id).FirstOrDefaultAsync();
+            var eventLog = await _eventPublishlogCollection.Find(e => e.Id == id).FirstOrDefaultAsync();
+
+            if (eventLog == null)
+            {
+                throw new DocumentNotFoundException("EventPublishLog", id);
+            }
+            return eventLog;
         }
 
-        public async Task<bool> UpdateAsync(string id, EventPublishlog entity)
+        //Will not be used
+        public async Task UpdateAsync(string id, EventPublishlog entity)
         {
-            entity.Id = id;
-            return await _eventPublishlogCollection.ReplaceOneAsync(i => i.Id == id, entity)
-                .ContinueWith(task => task.Result.ModifiedCount > 0);
+            throw new NotImplementedException();
         }
     }
 }

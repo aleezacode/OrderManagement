@@ -1,6 +1,7 @@
 using System;
 using MediatR;
 using OrderManagement.Commands.Inventory;
+using OrderManagement.Exceptions;
 using OrderManagement.Kafka;
 using OrderManagement.Models.Events.Inventory;
 using OrderManagement.Repositories;
@@ -27,21 +28,11 @@ namespace OrderManagement.Handlers.Inventory
                 _logger.LogInformation($"Handling ReleaseStock command for product: {request.ProductId}");
                 var inventory = await _inventoryRepository.FindOneAsync(i => i.ProductId == request.ProductId);
 
-                if (inventory == null)
-                {
-                    _logger.LogError($"Inventory for product: {request.ProductId} does not exist");
-                    throw new Exception();
-                }
-
                 var previousQuantity = inventory.Quantity;
                 inventory.Quantity += request.ReleaseQuantity;
-                var updated = await _inventoryRepository.UpdateAsync(inventory.Id, inventory);
 
-                if (!updated)
-                {
-                    _logger.LogError($"Failed to update inventory for product: {inventory.ProductId}");
-                    throw new Exception();
-                }
+                await _inventoryRepository.UpdateAsync(inventory.Id, inventory);
+
 
                 var stockReleasedEvent = new StockReleased()
                 {
@@ -58,9 +49,19 @@ namespace OrderManagement.Handlers.Inventory
 
                 return true;
             }
+            catch (DocumentNotFoundException ex)
+            {
+                _logger.LogError(ex, $"Cannot release stock. Inventory for productId {request.ProductId} was not found");
+                throw;
+            }
+            catch (DocumentUpdatedFailedException ex)
+            {
+                _logger.LogError(ex, $"Failed to update inventory for productId {request.ProductId}");
+                throw;
+            }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Failed to handle ReleaseStockCommand for product {request.ProductId}");
+                _logger.LogError(ex, $"Unexpected error when handling ReleaseStockCommand for product {request.ProductId}");
                 throw;
             }
         }

@@ -9,6 +9,7 @@ using OrderManagement.Repositories;
 using InventoryModel = OrderManagement.Models.Inventory;
 using OrderManagement.Commands.Inventory;
 using OrderManagement.Models.Events.Inventory;
+using OrderManagement.Exceptions;
 
 namespace OrderManagement.Handlers.Inventory
 {
@@ -30,9 +31,9 @@ namespace OrderManagement.Handlers.Inventory
             {
                 _logger.LogInformation($"Handling ReserveStock command for order: {command.OrderId}, product: {command.ReservedItem.ProductId}, quantity: {command.ReservedItem.Quantity}");
                 var inventoryItem = await _inventoryRepository.FindOneAsync(inv => inv.ProductId == command.ReservedItem.ProductId);
-                if (inventoryItem == null || inventoryItem.Quantity < command.ReservedItem.Quantity)
+
+                if (inventoryItem.Quantity < command.ReservedItem.Quantity)
                 {
-                    _logger.LogError($"No inventory found for product: {command.ReservedItem.ProductId}");
                     var inventoryShortageEvent = new InventoryShortage
                     {
                         OrderId = command.OrderId,
@@ -41,19 +42,13 @@ namespace OrderManagement.Handlers.Inventory
                         AvailableQuantity = inventoryItem?.Quantity ?? 0,
                         Message = "Insufficient stock"
                     };
-                    await _eventProducer.ProduceAsync("inventory-shortage", inventoryShortageEvent, cancellationToken);
-                    _logger.LogError($"Stock insufficient for product: {inventoryItem.ProductId}");
-                    throw new InvalidOperationException($"Insufficient stock for product {command.ReservedItem.ProductId}");
-                }
-                    
-                inventoryItem.Quantity -= command.ReservedItem.Quantity;
-                var updated = await _inventoryRepository.UpdateAsync(inventoryItem.Id, inventoryItem);
 
-                if (!updated)
-                {
-                    _logger.LogError($"Failed to update stock for product: {inventoryItem.ProductId}");
-                    throw new Exception();
+                    await _eventProducer.ProduceAsync("inventory-shortage", inventoryShortageEvent, cancellationToken);
+                    throw new InsufficientStockException(command.ReservedItem.ProductId, command.ReservedItem.Quantity, inventoryItem.Quantity);
                 }
+
+                inventoryItem.Quantity -= command.ReservedItem.Quantity;
+                await _inventoryRepository.UpdateAsync(inventoryItem.Id, inventoryItem);
 
                 var inventoryReservedEvent = new InventoryReserved
                 {
@@ -68,9 +63,24 @@ namespace OrderManagement.Handlers.Inventory
 
                 return command.OrderId;
             }
+            catch (DocumentNotFoundException ex)
+            {
+                _logger.LogError(ex, $"Failed to find inventory for productId {command.ReservedItem.ProductId}");
+                throw;
+            }
+            catch (DocumentUpdatedFailedException ex)
+            {
+                _logger.LogError(ex, $"Failed to update inventory for productId {command.ReservedItem.ProductId}");
+                throw;
+            }
+            catch (InsufficientStockException ex)
+            {
+                _logger.LogError(ex,$"Failed to reserve stock for productId {command.ReservedItem.ProductId}. Stock insufficient");
+                throw;
+            }
             catch (Exception ex)
             {
-                _logger.LogError(ex,$"Failed to handle ReserveStock command for order: {command.OrderId}");
+                _logger.LogError(ex, $"Unexpected error while ReserveStock command for order: {command.OrderId}");
                 throw;
             }
        }

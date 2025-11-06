@@ -8,6 +8,7 @@ using OrderManagement.Commands.Notification;
 using OrderManagement.Kafka;
 using OrderManagement.Models.Events;
 using OrderManagement.Models;
+using OrderManagement.Exceptions;
 
 namespace OrderManagement.Handlers.Order.Cancellation
 {
@@ -32,17 +33,11 @@ namespace OrderManagement.Handlers.Order.Cancellation
                 _logger.LogInformation($"Handling CancelOrderByUser command for order: {request.OrderId}");
 
                 var order = await _orderRepository.GetByIdAsync(request.OrderId);
-                if (order == null)
-                {
-                    _logger.LogError($"Order with id: {request.OrderId} does not exist");
-                    throw new Exception();
-                }
 
                 if (order.OrderStatus != OrderStatus.Placed)
                 {
                     _logger.LogWarning($"Order cannot be cancelled. Order: {order.Id} has status {order.OrderStatus}");
-                    //TODO: Add proper error handling
-                    throw new InvalidOperationException("Order is already cancelled/failed/paid");
+                    throw new InvalidOperationException($"Order has status {order.OrderStatus}");
                 }
 
                 if (order.OrderStatus == OrderStatus.Placed)
@@ -53,13 +48,7 @@ namespace OrderManagement.Handlers.Order.Cancellation
                 }
 
                 order.OrderStatus = OrderStatus.Cancelled;
-                var updated = await _orderRepository.UpdateAsync(order.Id, order);
-
-                if (!updated)
-                {
-                    _logger.LogError($"Failed to update orderStatus for order: {order.Id}");
-                    throw new Exception();   
-                }
+                await _orderRepository.UpdateAsync(order.Id, order);
 
                 var orderCancelledEvent = new OrderCancelled()
                 {
@@ -72,12 +61,22 @@ namespace OrderManagement.Handlers.Order.Cancellation
                 _logger.LogInformation($"Publishing OrderCancelled event for order: {order.Id}");
                 await _eventProducer.ProduceAsync("order-cancelled", orderCancelledEvent, cancellationToken);
                 _logger.LogInformation($"Successfully published OrderCancelled event for order: {order.Id}");
-                
+
                 return true;
+            }
+            catch (DocumentNotFoundException ex)
+            {
+                _logger.LogError(ex, $"Failed to find order with id {request.OrderId}");
+                throw;
+            }
+            catch (DocumentUpdatedFailedException ex)
+            {
+                _logger.LogError(ex, $"Failed to update order with id {request.OrderId}");
+                throw;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex,$"Failed to cancel order by user, order: {request.OrderId}");
+                _logger.LogError(ex, $"Unexpected error while handling CancelOrderByUser for order: {request.OrderId}");
                 throw;
             }
         }

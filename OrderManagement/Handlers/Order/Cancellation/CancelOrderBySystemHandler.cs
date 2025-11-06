@@ -2,6 +2,7 @@ using System;
 using MediatR;
 using OrderManagement.Commands.Notification;
 using OrderManagement.Commands.Order.Cancellation;
+using OrderManagement.Exceptions;
 using OrderManagement.Kafka;
 using OrderManagement.Models.Events;
 using OrderManagement.Repositories;
@@ -27,21 +28,10 @@ namespace OrderManagement.Handlers.Order.Cancellation
             {
                 _logger.LogInformation($"Handling CancelOrderBySystem command for order {request.OrderId}");
                 var order = await _orderRepository.GetByIdAsync(request.OrderId);
-                if (order == null)
-                {
-                    _logger.LogError($"Order with id: {order.Id} does not exist");
-                    throw new Exception();
-                }
 
 
                 order.OrderStatus = OrderStatus.Cancelled;
-                var updated = await _orderRepository.UpdateAsync(request.OrderId, order);
-
-                if (!updated)
-                {
-                    _logger.LogError($"Failed to update order status for order: {order.Id}");    
-                    throw new Exception();
-                }
+                await _orderRepository.UpdateAsync(request.OrderId, order);
 
                 var orderCancelledEvent = new OrderCancelled()
                 {
@@ -57,9 +47,19 @@ namespace OrderManagement.Handlers.Order.Cancellation
 
                 return true;
             }
+            catch (DocumentNotFoundException ex)
+            {
+                _logger.LogError(ex, $"Failed to find order with id {request.OrderId}");
+                throw;
+            }
+            catch (DocumentUpdatedFailedException ex)
+            {
+                _logger.LogError(ex, $"Failed to update order with id {request.OrderId}");
+                throw;
+            }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Failed to handle CancelOrderBySystem command for order: {request.OrderId}");
+                _logger.LogError(ex, $"Unexpected error while handling CancelOrderBySystem command for order: {request.OrderId}");
                 throw;
             }
         }

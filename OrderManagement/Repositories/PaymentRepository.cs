@@ -7,6 +7,7 @@ using MongoDB.Driver;
 using Microsoft.Extensions.Options;
 using OrderManagement.Configuration;
 using System.Linq.Expressions;
+using OrderManagement.Exceptions;
 
 namespace OrderManagement.Repositories
 {
@@ -22,8 +23,15 @@ namespace OrderManagement.Repositories
 
         public async Task<Payment> CreateAsync(Payment entity)
         {
-            await _paymentCollection.InsertOneAsync(entity);
-            return entity;
+            try
+            {
+                await _paymentCollection.InsertOneAsync(entity);
+                return entity;
+            }
+            catch (Exception ex)
+            {
+                throw new DocumentCreationFailedException("Payment", ex);
+            }
         }
 
         public async Task<bool> DeleteAsync(string id)
@@ -42,16 +50,28 @@ namespace OrderManagement.Repositories
             return await _paymentCollection.Find(_ => true).ToListAsync();
         }
 
-        public async Task<Payment?> GetByIdAsync(string id)
+        public async Task<Payment> GetByIdAsync(string id)
         {
-            return await _paymentCollection.Find(p => p.Id == id).FirstOrDefaultAsync();
+            var payment = await _paymentCollection.Find(p => p.Id == id).FirstOrDefaultAsync();
+
+            if (payment == null)
+            {
+                throw new DocumentNotFoundException("Payment", id);
+            }
+
+            return payment;
         }
 
-        public async Task<bool> UpdateAsync(string id, Payment entity)
+        public async Task UpdateAsync(string id, Payment entity)
         {
             entity.Id = id;
-            return await _paymentCollection.ReplaceOneAsync(p => p.Id == id, entity)
-                .ContinueWith(task => task.Result.ModifiedCount > 0);
+
+            var result = await _paymentCollection.ReplaceOneAsync(p => p.Id == id, entity);
+
+            if (result.ModifiedCount == 0)
+            {
+                throw new DocumentUpdatedFailedException("Payment", id);
+            }
         }
     }
 }

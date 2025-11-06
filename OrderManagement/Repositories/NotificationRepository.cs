@@ -8,6 +8,8 @@ using Microsoft.Extensions.Options;
 using OrderManagement.Configuration;
 using System.Linq.Expressions;
 using MongoDB.Bson;
+using OrderManagement.Exceptions;
+using Confluent.Kafka;
 
 namespace OrderManagement.Repositories
 {
@@ -23,8 +25,15 @@ namespace OrderManagement.Repositories
 
         public async Task<Notification> CreateAsync(Notification entity)
         {
-            await _notificationCollection.InsertOneAsync(entity);
-            return entity;
+            try
+            {
+                await _notificationCollection.InsertOneAsync(entity);
+                return entity;
+            }
+            catch (Exception ex)
+            {
+                throw new DocumentCreationFailedException("Notification", ex);
+            }
         }
 
         public async Task<bool> DeleteAsync(string id)
@@ -43,16 +52,28 @@ namespace OrderManagement.Repositories
             return await _notificationCollection.Find(_ => true).ToListAsync();
         }
 
-        public async Task<Notification?> GetByIdAsync(string id)
+        public async Task<Notification> GetByIdAsync(string id)
         {
-            return await _notificationCollection.Find(n => n.Id == id).FirstOrDefaultAsync();
+            var notification = await _notificationCollection.Find(n => n.Id == id).FirstOrDefaultAsync();
+
+            if (notification == null)
+            {
+                throw new DocumentNotFoundException("Notification", id);
+            }
+
+            return notification;
         }
 
-        public async Task<bool> UpdateAsync(string id, Notification entity)
+        public async Task UpdateAsync(string id, Notification entity)
         {
             entity.Id = id;
-            return await _notificationCollection.ReplaceOneAsync(n => n.Id == id, entity)
-                .ContinueWith(task => task.Result.ModifiedCount > 0);
+
+            var result = await _notificationCollection.ReplaceOneAsync(n => n.Id == id, entity);
+
+            if (result.ModifiedCount == 0)
+            {
+                throw new DocumentUpdatedFailedException("Notification", id);
+            }
         }
     }
 }

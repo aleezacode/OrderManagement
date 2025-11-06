@@ -7,6 +7,7 @@ using NotificationModel = OrderManagement.Models.Notification;
 using OrderManagement.Kafka;
 using OrderManagement.Models.Events.Notification;
 using OrderManagement.Models;
+using OrderManagement.Exceptions;
 
 namespace OrderManagement.Handlers.Notification
 {
@@ -32,17 +33,6 @@ namespace OrderManagement.Handlers.Notification
                 _logger.LogInformation($"Handling SendNotificationCommand for order: {request.OrderId}");
                 var order = await _orderRepository.GetByIdAsync(request.OrderId);
                 var user = await _userRepository.GetByIdAsync(order.UserId);
-                //TODO: Improve error handling
-                if (order == null)
-                {
-                    _logger.LogError($"Order with id {request.OrderId} does not exist");
-                    throw new Exception();
-                }
-                if (user == null)
-                {
-                    _logger.LogError($"User with id {order.UserId} does not exist");
-                    throw new Exception();
-                } 
 
                 var notification = new NotificationModel()
                 {
@@ -69,12 +59,22 @@ namespace OrderManagement.Handlers.Notification
                 _logger.LogInformation($"Publishing NotificationSent event for order: {order.Id}");
                 await _eventProducer.ProduceAsync("notification-sent", notificationSent);
                 _logger.LogInformation($"Published NotificationSent event for order: {order.Id}");
-                
+
                 return notification.Id!;
+            }
+            catch (DocumentNotFoundException ex)
+            {
+                _logger.LogError(ex, "Document not found in database. Look at the inner exception for more details");
+                throw;
+            }
+            catch (DocumentCreationFailedException ex)
+            {
+                _logger.LogError(ex, $"Failed to create notification for order {request.OrderId}");
+                throw;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex,$"Failed to handle SendNotification command for order: {request.OrderId}");
+                _logger.LogError(ex, $"Unexpected error while SendNotification command for order: {request.OrderId}");
                 throw;
             }
         }

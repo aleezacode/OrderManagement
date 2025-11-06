@@ -8,6 +8,7 @@ using OrderManagement.Models;
 using OrderManagement.Configuration;
 using System.Linq.Expressions;
 using MongoDB.Bson;
+using OrderManagement.Exceptions;
 
 namespace OrderManagement.Repositories
 {
@@ -23,8 +24,15 @@ namespace OrderManagement.Repositories
 
         public async Task<Order> CreateAsync(Order entity)
         {
-            await _orderCollection.InsertOneAsync(entity);
-            return entity;
+            try
+            {
+                await _orderCollection.InsertOneAsync(entity);
+                return entity;
+            }
+            catch (Exception ex)
+            {
+                throw new DocumentCreationFailedException("Order", ex);
+            }
         }
 
         public async Task<bool> DeleteAsync(string id)
@@ -43,18 +51,29 @@ namespace OrderManagement.Repositories
             return await _orderCollection.Find(_ => true).ToListAsync();
         }
 
-        public async Task<Order?> GetByIdAsync(string id)
+        public async Task<Order> GetByIdAsync(string id)
         {
-            return await _orderCollection.Find(o => o.Id == id).FirstOrDefaultAsync();
+            var order = await _orderCollection.Find(o => o.Id == id).FirstOrDefaultAsync();
+
+            if (order == null)
+            {
+                throw new DocumentNotFoundException("Order", id);
+            }
+
+            return order;
         }
 
-        public async Task<bool> UpdateAsync(string id, Order entity)
+        public async Task UpdateAsync(string id, Order entity)
         {
             entity.Id = id;
             entity.UpdatedAt = DateTime.UtcNow;
 
-            return await _orderCollection.ReplaceOneAsync(o => o.Id == id, entity)
-                .ContinueWith(task => task.Result.ModifiedCount > 0);
+            var result = await _orderCollection.ReplaceOneAsync(o => o.Id == id, entity);
+
+            if (result.ModifiedCount == 0)
+            {
+                throw new DocumentUpdatedFailedException("Order", id);
+            }
         }
         
     }

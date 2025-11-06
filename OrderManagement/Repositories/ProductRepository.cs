@@ -7,6 +7,7 @@ using MongoDB.Driver;
 using OrderManagement.Models;
 using OrderManagement.Configuration;
 using System.Linq.Expressions;
+using OrderManagement.Exceptions;
 
 namespace OrderManagement.Repositories
 {
@@ -42,13 +43,20 @@ namespace OrderManagement.Repositories
             throw new NotImplementedException();
         }
 
-        public async Task<Product?> GetByIdAsync(string id)
+        public async Task<Product> GetByIdAsync(string id)
         {
-            return await _productCollection.Find(p => p.Id == id).FirstOrDefaultAsync();
+            var product = await _productCollection.Find(p => p.Id == id).FirstOrDefaultAsync();
+
+            if (product == null)
+            {
+                throw new DocumentNotFoundException("Product", id);
+            }
+
+            return product;
         }
 
         //Will not be used
-        public Task<bool> UpdateAsync(string id, Product entity)
+        public Task UpdateAsync(string id, Product entity)
         {
             throw new NotImplementedException();
         }

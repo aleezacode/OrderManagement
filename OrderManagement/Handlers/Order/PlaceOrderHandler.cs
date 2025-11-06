@@ -12,6 +12,7 @@ using OrderManagement.Kafka;
 using OrderManagement.Models.Events.Orders;
 using OrderItemEvent = OrderManagement.Models.Events.Orders.OrderItem;
 using MongoDB.Bson;
+using OrderManagement.Exceptions;
 
 namespace OrderManagement.Handlers.Order
 {
@@ -19,14 +20,16 @@ namespace OrderManagement.Handlers.Order
     {
         private readonly IRepository<OrderModel> _orderRepository;
         private readonly IRepository<Product> _productRepository;
+        private readonly IRepository<User> _userRepository;
         private readonly IEventProducer _eventProducer;
         private readonly ILogger<PlaceOrderHandler> _logger;
 
-        public PlaceOrderHandler(IRepository<OrderModel> orderRepository, IRepository<Product> productRepository, IEventProducer eventProducer, ILogger<PlaceOrderHandler> logger)
+        public PlaceOrderHandler(IRepository<OrderModel> orderRepository, IRepository<Product> productRepository, IRepository<User> userRepository, IEventProducer eventProducer, ILogger<PlaceOrderHandler> logger)
         {
             _orderRepository = orderRepository;
             _productRepository = productRepository;
             _eventProducer = eventProducer;
+            _userRepository = userRepository;
             _logger = logger;
         }
 
@@ -35,7 +38,8 @@ namespace OrderManagement.Handlers.Order
             try
             {
                 _logger.LogInformation($"Handling PlaceOrder command for user: {request.UserId}");
-            
+                await _userRepository.GetByIdAsync(request.UserId); //Call the repo to throw if user doesn't exist
+
                 var orderItem = await BuildeOrderItems(request.Item);
                 var order = new OrderModel
                 {
@@ -45,6 +49,7 @@ namespace OrderManagement.Handlers.Order
                     TotalAmount = orderItem.UnitPrice * orderItem.Quantity,
                     CreatedAt = DateTime.UtcNow
                 };
+
                 var insertedOrder = await _orderRepository.CreateAsync(order);
 
                 _logger.LogInformation($"Order successfully inserted for user: {request.UserId} with orderId {order.Id}");
@@ -70,9 +75,19 @@ namespace OrderManagement.Handlers.Order
 
                 return insertedOrder.Id!;
             }
+            catch (DocumentNotFoundException ex)
+            {
+                _logger.LogError(ex, $"Failed to find document while placing order. Look at the inner exception for more details");
+                throw;
+            }
+            catch (DocumentCreationFailedException ex)
+            {
+                _logger.LogError(ex, $"Failed to create order");
+                throw;
+            }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Failed to place order for user: {request.UserId}");
+                _logger.LogError(ex, $"Unexpected error while placing order for user: {request.UserId}");
                 throw;
             }
         }
@@ -82,11 +97,6 @@ namespace OrderManagement.Handlers.Order
             try
             {
                 var product = await _productRepository.GetByIdAsync(item.ProductId);
-                if (product == null)
-                {
-                    _logger.LogError($"Product not found for id: {item.ProductId}");
-                    throw new Exception($"Product with ID {item.ProductId} not found.");
-                }
 
                 return new OrderItemModel()
                 {

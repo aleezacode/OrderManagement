@@ -1,8 +1,10 @@
 using System;
 using System.Linq.Expressions;
+using System.Reflection.Metadata;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using OrderManagement.Configuration;
+using OrderManagement.Exceptions;
 using OrderManagement.Models;
 
 namespace OrderManagement.Repositories
@@ -40,13 +42,20 @@ namespace OrderManagement.Repositories
             throw new NotImplementedException();
         }
 
-        public async Task<User?> GetByIdAsync(string id)
+        public async Task<User> GetByIdAsync(string id)
         {
-            return await _userCollection.Find(u => u.Id == id).FirstOrDefaultAsync();
+            var user = await _userCollection.Find(u => u.Id == id).FirstOrDefaultAsync();
+
+            if (user == null)
+            {
+                throw new DocumentNotFoundException("User", id);
+            }
+
+            return user;
         }
 
         //Will not be used
-        public Task<bool> UpdateAsync(string id, User entity)
+        public Task UpdateAsync(string id, User entity)
         {
             throw new NotImplementedException();
         }
