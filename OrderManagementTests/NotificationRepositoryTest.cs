@@ -75,8 +75,12 @@ namespace OrderManagementTests
             var createdNotification = await _notificationRepository.CreateAsync(notification);
             createdNotification.Status = NotificationStatus.Sent;
 
-            var updated = await _notificationRepository.UpdateAsync(createdNotification.Id, createdNotification);
-            Assert.True(updated);
+            
+            var exception = await Record.ExceptionAsync(async () =>
+            {
+                await _notificationRepository.UpdateAsync(createdNotification.Id!, createdNotification);
+            });
+            Assert.Null(exception);
 
             var updatedNotification = await _notificationRepository.GetByIdAsync(createdNotification.Id!);
             Assert.NotNull(updatedNotification);

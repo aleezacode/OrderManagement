@@ -98,8 +98,12 @@ namespace OrderManagementTests
             };
             await _orderRepository.CreateAsync(order);
             order.OrderStatus = OrderStatus.Failed;
-            var updateResult = await _orderRepository.UpdateAsync(order.Id, order);
-            Assert.True(updateResult);
+
+            var exception = await Record.ExceptionAsync(async () =>
+            {
+                await _orderRepository.UpdateAsync(order.Id!, order);
+            });
+            Assert.Null(exception);
         }
     }
 }
