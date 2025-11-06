@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using OrderManagement.Exceptions;
 using OrderManagement.Models;
 using OrderManagement.Repositories;
 
@@ -102,8 +103,12 @@ namespace OrderManagementTests
             var createdNotification = await _notificationRepository.CreateAsync(notification);
             await _notificationRepository.DeleteAsync(createdNotification.Id!);
 
-            var deletedNotification = await _notificationRepository.GetByIdAsync(createdNotification.Id!);
-            Assert.Null(deletedNotification);
+            var exception = await Record.ExceptionAsync(async() =>
+            {
+                await _notificationRepository.GetByIdAsync(createdNotification.Id);
+            });
+            Assert.NotNull(exception);
+            Assert.Equal(typeof(DocumentNotFoundException), exception.GetType());
         }
     }
 }

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Connections;
 using MongoDB.Bson;
+using OrderManagement.Exceptions;
 using OrderManagement.Models;
 using OrderManagement.Models.Enums;
 using OrderManagement.Repositories;
@@ -97,8 +98,12 @@ namespace OrderManagementTests
             var createdPayment = await _paymentRepository.CreateAsync(payment);
             await _paymentRepository.DeleteAsync(createdPayment.Id!);
 
-            var deletedPayment = await _paymentRepository.GetByIdAsync(createdPayment.Id!);
-            Assert.Null(deletedPayment);
+            var exception = await Record.ExceptionAsync(async() =>
+            {
+                await _paymentRepository.GetByIdAsync(createdPayment.Id);
+            });
+            Assert.NotNull(exception);
+            Assert.Equal(typeof(DocumentNotFoundException), exception.GetType());
         }
     }
 }
