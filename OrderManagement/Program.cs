@@ -6,6 +6,8 @@ using OrderManagement.Models;
 using OrderManagement.Kafka;
 using OrderManagement.Consumers.Order;
 using OrderManagement.Consumers.Inventory;
+using FluentValidation;
+using OrderManagement.Validators;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,7 +17,9 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 // MediatR
+builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationPipelineBehaviour<,>));
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
+builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly);
 
 // Mongo setup
 builder.Services.Configure<MongoDBSettings>(
