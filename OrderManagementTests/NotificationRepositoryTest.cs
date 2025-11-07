@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using MongoDB.Bson;
 using OrderManagement.Exceptions;
 using OrderManagement.Models;
 using OrderManagement.Repositories;
@@ -38,6 +39,17 @@ namespace OrderManagementTests
         }
 
         [Fact]
+        public async Task CreateNotificationNotOK_ExceptionThrown()
+        {
+            var exception = await Assert.ThrowsAsync<DocumentCreationFailedException>(
+                () => _notificationRepository.CreateAsync(null)
+            );
+
+            Assert.Equal("Notification", exception.DocumentType);
+            Assert.Contains("Failed to create", exception.Message);
+        }
+
+        [Fact]
         public async Task GetNotificationByIdOK()
         {
             var notification = new Notification
@@ -62,6 +74,33 @@ namespace OrderManagementTests
         }
 
         [Fact]
+        public async Task GetNotificationByIdNotOK_ExceptionThrown()
+        {
+            var nonExistentId = ObjectId.GenerateNewId().ToString();
+
+            var exception = await Assert.ThrowsAsync<DocumentNotFoundException>(
+                () => _notificationRepository.GetByIdAsync(nonExistentId)
+            );
+
+            Assert.Equal("Notification", exception.DocumentType);
+            Assert.Equal(nonExistentId, exception.DocumentId);
+            Assert.Contains("was not found", exception.Message);
+        }
+
+        [Fact]
+        public async Task GetNotificationByIdNotOk_IdIsNull_ExceptionThrown()
+        {
+
+            var exception = await Assert.ThrowsAsync<DocumentNotFoundException>(
+                () => _notificationRepository.GetByIdAsync(null)
+            );
+
+            Assert.Equal("Notification", exception.DocumentType);
+            Assert.Null(exception.DocumentId);
+            Assert.Contains("was not found", exception.Message);
+        }
+
+        [Fact]
         public async Task UpdateNotificationStatusOK()
         {
             var notification = new Notification
@@ -76,16 +115,34 @@ namespace OrderManagementTests
             var createdNotification = await _notificationRepository.CreateAsync(notification);
             createdNotification.Status = NotificationStatus.Sent;
 
-            
-            var exception = await Record.ExceptionAsync(async () =>
-            {
-                await _notificationRepository.UpdateAsync(createdNotification.Id!, createdNotification);
-            });
-            Assert.Null(exception);
+            await _notificationRepository.UpdateAsync(createdNotification.Id!, createdNotification);
 
             var updatedNotification = await _notificationRepository.GetByIdAsync(createdNotification.Id!);
             Assert.NotNull(updatedNotification);
             Assert.Equal(NotificationStatus.Sent, updatedNotification.Status);
+        }
+
+        [Fact]
+        public async Task UpdateNotificationNotOk_ExceptionThrown()
+        {
+            var notification = new Notification
+            {
+                UserId = "64a7f0c2e1b8c8f5d6a4e9b5",
+                OrderId = "64a7f0c2e1b8c8f5d6a4e9c4",
+                Message = "Updating notification",
+                Type = Type.Email,
+                Status = NotificationStatus.Sent
+            };
+
+            var nonExistentId = ObjectId.GenerateNewId().ToString();
+
+            var exception = await Assert.ThrowsAsync<DocumentUpdatedFailedException>(
+                () => _notificationRepository.UpdateAsync(nonExistentId, notification)
+            );
+
+            Assert.Equal("Notification", exception.DocumentType);
+            Assert.Equal(nonExistentId, exception.DocumentId);
+            Assert.Contains("Failed to update", exception.Message);
         }
 
         [Fact]

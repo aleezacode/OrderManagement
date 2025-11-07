@@ -39,6 +39,17 @@ namespace OrderManagementTests
         }
 
         [Fact]
+        public async Task CreatePaymentNotOk_ThrowException()
+        {
+            var exception = await Assert.ThrowsAsync<DocumentCreationFailedException>(
+                async () => await _paymentRepository.CreateAsync(null)
+            );
+
+            Assert.Equal("Payment", exception.DocumentType);
+            Assert.Contains("Failed to create", exception.Message);
+        }
+
+        [Fact]
         public async Task GetPaymentByIdOK()
         {
             var payment = new Payment
@@ -58,6 +69,32 @@ namespace OrderManagementTests
             Assert.Equal(createdPayment.Amount, fetchedPayment.Amount);
             Assert.Equal(createdPayment.PaymentStatus, fetchedPayment.PaymentStatus);
             Assert.Equal(createdPayment.UserId, fetchedPayment.UserId);
+        }
+
+        [Fact]
+        public async Task GetPaymentByIdNotOK_ThrowsException()
+        {
+            var nonExistentId = ObjectId.GenerateNewId().ToString();
+
+            var exception = await Assert.ThrowsAsync<DocumentNotFoundException>(
+                async () => await _paymentRepository.GetByIdAsync(nonExistentId)
+            );
+
+            Assert.Equal("Payment", exception.DocumentType);
+            Assert.Equal(nonExistentId, exception.DocumentId);
+            Assert.Contains("was not found", exception.Message);
+        }
+
+        [Fact]
+        public async Task GetPaymentByIdNotOk_IdIsNull_ThrowsException()
+        {
+            var exception = await Assert.ThrowsAsync<DocumentNotFoundException>(
+                async () => await _paymentRepository.GetByIdAsync(null)
+            );
+
+            Assert.Equal("Payment", exception.DocumentType);
+            Assert.Null(exception.DocumentId);
+            Assert.Contains("was not found", exception.Message);
         }
 
         [Fact]
@@ -82,6 +119,28 @@ namespace OrderManagementTests
             Assert.NotNull(updatedPayment);
             Assert.Equal(PaymentStatus.Processed, updatedPayment.PaymentStatus);
             Assert.NotNull(updatedPayment.ProcessedAt);
+        }
+
+        [Fact]
+        public async Task UpdatePaymentNotOk_ThrowsException()
+        {
+            var payment = new Payment
+            {
+                OrderId = ObjectId.GenerateNewId().ToString(),
+                Amount = 29.99m,
+                PaymentStatus = PaymentStatus.Pending,
+                UserId = "64a7f0c2e1b8c8f5d6a4e9b2"
+            };
+
+            var nonExistentId = ObjectId.GenerateNewId().ToString();
+
+            var exception = await Assert.ThrowsAsync<DocumentUpdatedFailedException>(
+                async () => await _paymentRepository.UpdateAsync(nonExistentId, payment)
+            );
+
+            Assert.Equal("Payment", exception.DocumentType);
+            Assert.Equal(nonExistentId, exception.DocumentId);
+            Assert.Contains("Failed to update", exception.Message);
         }
 
         [Fact]
