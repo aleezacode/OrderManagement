@@ -34,11 +34,7 @@ namespace OrderManagement.Consumers.Inventory
                 using var scope = _serviceProvider.CreateScope();
                 var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
 
-                var notificationCommand = new SendNotificationCommand
-                {
-                    OrderId = @event.OrderId,
-                    Message = @event.Reason
-                };
+                var notificationCommand = new SendNotificationCommand(@event.OrderId, @event.Reason);
 
                 _logger.LogInformation($"Sending reservedStock SendNotification command for order: {@event.OrderId}");
                 await mediator.Send(notificationCommand, cancellationToken);

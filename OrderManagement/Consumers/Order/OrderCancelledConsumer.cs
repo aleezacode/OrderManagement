@@ -31,11 +31,7 @@ namespace OrderManagement.Consumers.Order
                 using var scope = _serviceProvider.CreateScope();
                 var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
 
-                var sendNotificationCommand = new SendNotificationCommand()
-                {
-                    OrderId = @event.OrderId,
-                    Message = @event.Reason
-                };
+                var sendNotificationCommand = new SendNotificationCommand(@event.OrderId, @event.Reason);
 
                 _logger.LogInformation($"Sending cancellation SendNotification command for order: {@event.OrderId}");
                 await mediator.Send(sendNotificationCommand, cancellationToken);
