@@ -6,11 +6,11 @@ using OrderManagement.Configuration;
 
 namespace OrderManagementTests;
 
-public class BaseIntegrationTest : IDisposable
+public class BaseRepositoryTest : IDisposable
 {
     protected readonly MongoDbRunner _mongoRunner;
     protected readonly IOptions<MongoDBSettings> _mongoDBSettings;
-    protected BaseIntegrationTest(string collectionName)
+    protected BaseRepositoryTest(string collectionName)
     {
         _mongoRunner = MongoDbRunner.Start();
         _mongoDBSettings = Options.Create(new MongoDBSettings

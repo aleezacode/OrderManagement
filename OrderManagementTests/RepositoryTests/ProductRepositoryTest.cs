@@ -7,7 +7,7 @@ using OrderManagement.Repositories;
 
 namespace OrderManagementTests
 {
-    public class ProductRepositoryTest : BaseIntegrationTest
+    public class ProductRepositoryTest : BaseRepositoryTest
     {
         private readonly ProductRepository _productRepository;
 

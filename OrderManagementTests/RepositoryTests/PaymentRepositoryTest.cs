@@ -11,7 +11,7 @@ using OrderManagement.Repositories;
 
 namespace OrderManagementTests
 {
-    public class PaymentRepositoryTest : BaseIntegrationTest
+    public class PaymentRepositoryTest : BaseRepositoryTest
     {
         private readonly PaymentRepository _paymentRepository;
         public PaymentRepositoryTest() : base("Payments")

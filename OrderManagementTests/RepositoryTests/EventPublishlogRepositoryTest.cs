@@ -7,7 +7,7 @@ using OrderManagement.Repositories;
 
 namespace OrderManagementTests
 {
-    public class EventPublishlogRepositoryTest : BaseIntegrationTest
+    public class EventPublishlogRepositoryTest : BaseRepositoryTest
     {
         private readonly EventPublishlogRepository _eventPublishlogRepository;
         public EventPublishlogRepositoryTest() : base("EventPublishlog")

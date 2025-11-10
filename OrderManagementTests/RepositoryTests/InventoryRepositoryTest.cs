@@ -7,7 +7,7 @@ using OrderManagement.Repositories;
 
 namespace OrderManagementTests
 {
-    public class InventoryRepositoryTest : BaseIntegrationTest
+    public class InventoryRepositoryTest : BaseRepositoryTest
     {
         private readonly InventoryRepository _inventoryRepository;
         public InventoryRepositoryTest() : base("inventory")

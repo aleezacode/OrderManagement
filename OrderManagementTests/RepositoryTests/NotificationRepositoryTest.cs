@@ -9,7 +9,7 @@ using OrderManagement.Repositories;
 
 namespace OrderManagementTests
 {
-    public class NotificationRepositoryTest : BaseIntegrationTest
+    public class NotificationRepositoryTest : BaseRepositoryTest
     {
         private readonly NotificationRepository _notificationRepository;
         public NotificationRepositoryTest() : base("Notifications")
