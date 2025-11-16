@@ -28,7 +28,10 @@ namespace OrderManagementTests.IntegrationTests
         private string _dbName = string.Empty;
         public async Task DisposeAsync()
         {
-            await Task.CompletedTask;
+            foreach (var collectionName in _collectionsToDrop)
+            {
+                await MongoDatabase.DropCollectionAsync(collectionName);
+            }
         }
 
         public virtual async Task InitializeAsync()
@@ -120,11 +123,6 @@ namespace OrderManagementTests.IntegrationTests
                 await inventoryCollection.InsertOneAsync(inventory);
 
                 return newProduct;
-            } else
-            {
-                var testInventory = await inventoryCollection.Find(x => x.ProductId == testProduct.Id).FirstOrDefaultAsync();
-                testInventory.Quantity = 100;
-                await inventoryCollection.ReplaceOneAsync(t => t.Id == testInventory.Id, testInventory);
             }
 
             return testProduct;
@@ -155,6 +153,18 @@ namespace OrderManagementTests.IntegrationTests
 
             return order;
         }
+
+        private readonly string[] _collectionsToDrop = new[]
+        {
+            "Users",
+            "Products",
+            "Inventory",
+            "Orders",
+            "Payments",
+            "Notifications",
+            "EventPublishLogs"
+        };
+
 
         protected T GetService<T>() where T : notnull
             => ServiceProvider.GetRequiredService<T>();
