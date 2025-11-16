@@ -124,7 +124,7 @@ namespace OrderManagementTests.IntegrationTests
             {
                 var testInventory = await inventoryCollection.Find(x => x.ProductId == testProduct.Id).FirstOrDefaultAsync();
                 testInventory.Quantity = 100;
-                await inventoryCollection.ReplaceOneAsync(testInventory.Id, testInventory);
+                await inventoryCollection.ReplaceOneAsync(t => t.Id == testInventory.Id, testInventory);
             }
 
             return testProduct;
