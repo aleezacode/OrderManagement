@@ -13,7 +13,7 @@ namespace OrderManagementTests
         private readonly EventPublishlogRepository _eventPublishlogRepository;
         public EventPublishlogRepositoryTest() : base("EventPublishlog")
         {
-            _eventPublishlogRepository = new EventPublishlogRepository(MongoDbSettings);
+            _eventPublishlogRepository = new EventPublishlogRepository(Database,MongoDbSettings);
         }
 
         private async Task<OrderCancelled> CreateEvent()
