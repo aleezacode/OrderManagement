@@ -15,11 +15,9 @@ namespace OrderManagement.Repositories
     public class OrderRepository : IRepository<Order>
     {
         private readonly IMongoCollection<Order> _orderCollection;
-        public OrderRepository(IOptions<MongoDBSettings> mongoDBSettings)
+        public OrderRepository(IMongoDatabase database, IOptions<MongoDBSettings> mongoDBSettings)
         {
-            var mongoClient = new MongoClient(mongoDBSettings.Value.ConnectionString);
-            var mongoDatabase = mongoClient.GetDatabase(mongoDBSettings.Value.DatabaseName);
-            _orderCollection = mongoDatabase.GetCollection<Order>(mongoDBSettings.Value.OrdersCollectionName);
+            _orderCollection = database.GetCollection<Order>(mongoDBSettings.Value.OrdersCollectionName);
         }
 
         public async Task<Order> CreateAsync(Order entity)

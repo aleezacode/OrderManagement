@@ -1,46 +1,49 @@
-﻿using MongoDB.Driver;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Options;
+using MongoDB.Driver;
 using OrderManagement.Configuration;
 using Testcontainers.MongoDb;
 
-namespace OrderManagementTests;
-
-public class BaseRepositoryTest : IAsyncLifetime
+public abstract class BaseRepositoryTest : IAsyncLifetime
 {
-    private readonly MongoDbContainer _mongoContainer;
     protected IOptions<MongoDBSettings> MongoDbSettings { get; private set; } = default!;
     protected IMongoClient Client { get; private set; } = default!;
     protected IMongoDatabase Database { get; private set; } = default!;
 
-    private readonly string _collectionName;
+    private readonly MongoDbContainer _mongoContainer;
+    private readonly string _databaseName = "UnitTestDb";
 
     protected BaseRepositoryTest(string collectionName)
     {
-        _collectionName = collectionName;
+        // Set defaults (collection names)
+        MongoDbSettings = Options.Create(new MongoDBSettings
+        {
+            ConnectionString = "",
+            DatabaseName = _databaseName,
+            OrdersCollectionName = collectionName,
+            InventoryCollectionName = collectionName,
+            PaymentsCollectionName = collectionName,
+            NotificationsCollectionName = collectionName,
+            ProductsCollectionName = collectionName,
+            UsersCollectionName = collectionName,
+            EventPublishLogCollectionName = collectionName
+        });
 
         _mongoContainer = new MongoDbBuilder()
             .WithImage("mongo:7")
             .Build();
     }
 
-    public async Task InitializeAsync()
+    public virtual async Task InitializeAsync()
     {
         await _mongoContainer.StartAsync();
 
         var conn = _mongoContainer.GetConnectionString();
-        MongoDbSettings = Options.Create(new MongoDBSettings
-        {
-            ConnectionString = conn,
-            DatabaseName = "UnitTestDb",
-            OrdersCollectionName = _collectionName
-        });
+
+        MongoDbSettings.Value.ConnectionString = conn;
 
         Client = new MongoClient(conn);
-        Database = Client.GetDatabase("UnitTestDb");
+        Database = Client.GetDatabase(_databaseName);
     }
 
-    public async Task DisposeAsync()
-    {
-        await _mongoContainer.DisposeAsync();
-    }
+    public Task DisposeAsync() => _mongoContainer.DisposeAsync().AsTask();
 }

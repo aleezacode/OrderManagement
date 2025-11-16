@@ -10,10 +10,16 @@ namespace OrderManagementTests
     [Trait("Category", "Repository")]
     public class InventoryRepositoryTest : BaseRepositoryTest
     {
-        private readonly InventoryRepository _inventoryRepository;
-        public InventoryRepositoryTest() : base("inventory")
+        private InventoryRepository _inventoryRepository;
+        public InventoryRepositoryTest() : base("Inventory")
         {
-            _inventoryRepository = new InventoryRepository(MongoDbSettings);
+        }
+
+        public override async Task InitializeAsync()
+        {
+            await base.InitializeAsync();
+
+            _inventoryRepository = new InventoryRepository(Database, MongoDbSettings);
         }
 
         private async Task<Inventory> CreateTestInventory()

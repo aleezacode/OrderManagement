@@ -16,11 +16,9 @@ namespace OrderManagement.Repositories
     public class NotificationRepository : IRepository<Notification>
     {
         private readonly IMongoCollection<Notification> _notificationCollection;    
-        public NotificationRepository(IOptions<MongoDBSettings> mongoDBSettings)
+        public NotificationRepository(IMongoDatabase database, IOptions<MongoDBSettings> mongoDBSettings)
         {
-            var mongoClient = new MongoClient(mongoDBSettings.Value.ConnectionString);
-            var mongoDatabase = mongoClient.GetDatabase(mongoDBSettings.Value.DatabaseName);
-            _notificationCollection = mongoDatabase.GetCollection<Notification>(mongoDBSettings.Value.NotificationsCollectionName);
+            _notificationCollection = database.GetCollection<Notification>(mongoDBSettings.Value.NotificationsCollectionName);
         }
 
         public async Task<Notification> CreateAsync(Notification entity)

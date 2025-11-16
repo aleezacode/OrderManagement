@@ -14,11 +14,9 @@ namespace OrderManagement.Repositories
     public class PaymentRepository : IRepository<Payment>
     {
         private readonly IMongoCollection<Payment> _paymentCollection;
-        public PaymentRepository(IOptions<MongoDBSettings> mongoDBSettings)
+        public PaymentRepository(IMongoDatabase database, IOptions<MongoDBSettings> mongoDBSettings)
         {
-            var mongoClient = new MongoClient(mongoDBSettings.Value.ConnectionString);
-            var mongoDatabase = mongoClient.GetDatabase(mongoDBSettings.Value.DatabaseName);
-            _paymentCollection = mongoDatabase.GetCollection<Payment>(mongoDBSettings.Value.PaymentsCollectionName);
+            _paymentCollection = database.GetCollection<Payment>(mongoDBSettings.Value.PaymentsCollectionName);
         }
 
         public async Task<Payment> CreateAsync(Payment entity)

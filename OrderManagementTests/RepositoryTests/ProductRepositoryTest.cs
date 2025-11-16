@@ -10,13 +10,18 @@ namespace OrderManagementTests
     [Trait("Category", "Repository")]
     public class ProductRepositoryTest : BaseRepositoryTest
     {
-        private readonly ProductRepository _productRepository;
+        private ProductRepository _productRepository;
 
         public ProductRepositoryTest() : base("Products")
         {
-            _productRepository = new ProductRepository(MongoDbSettings);
         }
 
+        public override async Task InitializeAsync()
+        {
+            await base.InitializeAsync();
+
+            _productRepository = new ProductRepository(Database, MongoDbSettings);
+        }
         private async Task<Product> CreateTestProduct()
         {
             var collection = Database.GetCollection<Product>("Products");

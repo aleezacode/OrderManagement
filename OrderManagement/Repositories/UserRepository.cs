@@ -13,11 +13,9 @@ namespace OrderManagement.Repositories
     {
         private readonly IMongoCollection<User> _userCollection;
 
-        public UserRepository(IOptions<MongoDBSettings> mongoDBSettings)
+        public UserRepository(IMongoDatabase database, IOptions<MongoDBSettings> mongoDBSettings)
         {
-            var mongoClient = new MongoClient(mongoDBSettings.Value.ConnectionString);
-            var mongoDatabase = mongoClient.GetDatabase(mongoDBSettings.Value.DatabaseName);
-            _userCollection = mongoDatabase.GetCollection<User>(mongoDBSettings.Value.UsersCollectionName);
+            _userCollection = database.GetCollection<User>(mongoDBSettings.Value.UsersCollectionName);
         }
         //Will not be used
         public Task<User> CreateAsync(User entity)

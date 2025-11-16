@@ -10,15 +10,20 @@ namespace OrderManagementTests
     [Trait("Category", "Repository")]
     public class UserRepositoryTest : BaseRepositoryTest
     {
-        private readonly UserRepository _userRepository;
+        private UserRepository _userRepository;
         public UserRepositoryTest() : base("users")
         {
-            _userRepository = new UserRepository(MongoDbSettings);
         }
 
+        public override async Task InitializeAsync()
+        {
+            await base.InitializeAsync();
+
+            _userRepository = new UserRepository(Database, MongoDbSettings);
+        }
         private async Task<User> CreateTestUser()
         {
-            var collection = Database.GetCollection<User>("Users");
+            var collection = Database.GetCollection<User>(MongoDbSettings.Value.UsersCollectionName);
             
             var user = new User
             {

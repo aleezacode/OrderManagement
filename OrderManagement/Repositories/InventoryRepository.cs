@@ -16,11 +16,9 @@ namespace OrderManagement.Repositories
     public class InventoryRepository : IRepository<Inventory>
     {
         private readonly IMongoCollection<Inventory> _inventoryCollection;
-        public InventoryRepository(IOptions<MongoDBSettings> mongoDBSettings)
+        public InventoryRepository(IMongoDatabase database, IOptions<MongoDBSettings> mongoDBSettings)
         {
-            var mongoClient = new MongoClient(mongoDBSettings.Value.ConnectionString);
-            var mongoDatabase = mongoClient.GetDatabase(mongoDBSettings.Value.DatabaseName);
-            _inventoryCollection = mongoDatabase.GetCollection<Inventory>(mongoDBSettings.Value.InventoryCollectionName);
+            _inventoryCollection = database.GetCollection<Inventory>(mongoDBSettings.Value.InventoryCollectionName);
         }
 
         //Will not be used

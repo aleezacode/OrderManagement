@@ -14,10 +14,16 @@ namespace OrderManagementTests
     [Trait("Category", "Repository")]
     public class PaymentRepositoryTest : BaseRepositoryTest
     {
-        private readonly PaymentRepository _paymentRepository;
+        private PaymentRepository _paymentRepository;
         public PaymentRepositoryTest() : base("Payments")
         {
-            _paymentRepository = new PaymentRepository(MongoDbSettings);
+        }
+
+        public override async Task InitializeAsync()
+        {
+            await base.InitializeAsync();
+
+            _paymentRepository = new PaymentRepository(Database, MongoDbSettings);
         }
 
         [Fact]

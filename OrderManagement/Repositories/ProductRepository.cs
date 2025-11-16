@@ -15,11 +15,9 @@ namespace OrderManagement.Repositories
     {
         private readonly IMongoCollection<Product> _productCollection;
 
-        public ProductRepository(IOptions<MongoDBSettings> mongoDBSettings)
+        public ProductRepository(IMongoDatabase database, IOptions<MongoDBSettings> mongoDBSettings)
         {
-            var mongoClient = new MongoClient(mongoDBSettings.Value.ConnectionString);
-            var mongoDatabase = mongoClient.GetDatabase(mongoDBSettings.Value.DatabaseName);
-            _productCollection = mongoDatabase.GetCollection<Product>(mongoDBSettings.Value.ProductsCollectionName);
+            _productCollection = database.GetCollection<Product>(mongoDBSettings.Value.ProductsCollectionName);
         }
         //Will not be used
         public Task<Product> CreateAsync(Product entity)

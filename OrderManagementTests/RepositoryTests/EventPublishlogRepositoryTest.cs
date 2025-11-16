@@ -10,12 +10,19 @@ namespace OrderManagementTests
     [Trait("Category", "Repository")]
     public class EventPublishlogRepositoryTest : BaseRepositoryTest
     {
-        private readonly EventPublishlogRepository _eventPublishlogRepository;
+        private EventPublishlogRepository _eventPublishlogRepository;
         public EventPublishlogRepositoryTest() : base("EventPublishlog")
         {
-            _eventPublishlogRepository = new EventPublishlogRepository(Database,MongoDbSettings);
         }
 
+
+        public override async Task InitializeAsync()
+    {
+        await base.InitializeAsync();
+
+        // NOW Database and MongoDbSettings are initialized
+        _eventPublishlogRepository = new EventPublishlogRepository(Database, MongoDbSettings);
+    }
         private async Task<OrderCancelled> CreateEvent()
         {
             var ev = new OrderCancelled

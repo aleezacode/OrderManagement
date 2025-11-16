@@ -12,13 +12,18 @@ namespace OrderManagementTests
     [Trait("Category", "Repository")]
     public class OrderRepositoryTest : BaseRepositoryTest
     {
-        private readonly OrderRepository _orderRepository;
+        private OrderRepository _orderRepository;
 
         public OrderRepositoryTest() : base("Orders")
         {
-            _orderRepository = new OrderRepository(MongoDbSettings);
         }
 
+        public override async Task InitializeAsync()
+        {
+            await base.InitializeAsync();
+
+            _orderRepository = new OrderRepository(Database, MongoDbSettings);
+        }
         [Fact]
         public async Task CreateOrderOK()
         {

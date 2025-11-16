@@ -12,12 +12,17 @@ namespace OrderManagementTests
     [Trait("Category", "Repository")]
     public class NotificationRepositoryTest : BaseRepositoryTest
     {
-        private readonly NotificationRepository _notificationRepository;
+        private NotificationRepository _notificationRepository;
         public NotificationRepositoryTest() : base("Notifications")
         {
-            _notificationRepository = new NotificationRepository(MongoDbSettings);
         }
 
+        public override async Task InitializeAsync()
+        {
+            await base.InitializeAsync();
+
+            _notificationRepository = new NotificationRepository(Database, MongoDbSettings);
+        }
         [Fact]
         public async Task CreateNotificationOK()
         {
