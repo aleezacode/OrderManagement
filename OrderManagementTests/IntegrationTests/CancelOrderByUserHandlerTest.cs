@@ -9,6 +9,7 @@ using OrderManagement.Repositories;
 
 namespace OrderManagementTests.IntegrationTests
 {
+    [Trait("Category", "Integration")]
     public class CancelOrderByUserHandlerTest : BaseIntegrationTest
     {
         private IRepository<Inventory> _inventoryRepository;

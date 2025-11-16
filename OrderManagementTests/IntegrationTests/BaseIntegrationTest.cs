@@ -38,7 +38,7 @@ namespace OrderManagementTests.IntegrationTests
                 .AddJsonFile("appsettings.Test.json", optional: false, reloadOnChange: false)
                 .Build();
 
-            var connectionString = Configuration["MongoDBSettings:ConnectionString"];
+            var connectionString = Environment.GetEnvironmentVariable("MongoDBSettings__ConnectionString") ?? Configuration["MongoDBSettings:ConnectionString"];
             _dbName = Configuration["MongoDBSettings:DatabaseName"]!;
             _mongoClient = new MongoClient(connectionString);
             MongoDatabase = _mongoClient.GetDatabase(_dbName);

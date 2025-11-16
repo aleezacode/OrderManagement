@@ -11,12 +11,13 @@ using OrderManagement.Repositories;
 
 namespace OrderManagementTests
 {
+    [Trait("Category", "Repository")]
     public class PaymentRepositoryTest : BaseRepositoryTest
     {
         private readonly PaymentRepository _paymentRepository;
         public PaymentRepositoryTest() : base("Payments")
         {
-            _paymentRepository = new PaymentRepository(_mongoDBSettings);
+            _paymentRepository = new PaymentRepository(MongoDbSettings);
         }
 
         [Fact]

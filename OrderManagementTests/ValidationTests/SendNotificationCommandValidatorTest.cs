@@ -5,6 +5,7 @@ using OrderManagement.Validators.Notification;
 
 namespace OrderManagementTests.ValidationTests
 {
+    [Trait("Category", "Validation")]
     public class SendNotificationCommandValidatorTest
     {
         private readonly SendNotificationCommandValidator _validator;

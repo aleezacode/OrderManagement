@@ -9,6 +9,7 @@ using OrderManagement.Repositories;
 
 namespace OrderManagementTests.IntegrationTests
 {
+    [Trait("Category", "Integration")]
     public class SendNotificationHandlerTest : BaseIntegrationTest
     {
         private IRepository<Notification> _notificationRepository;

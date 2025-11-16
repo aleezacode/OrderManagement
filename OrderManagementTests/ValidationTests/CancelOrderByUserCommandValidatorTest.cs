@@ -5,6 +5,7 @@ using OrderManagement.Validators.Order;
 
 namespace OrderManagementTests.ValidationTests
 {
+    [Trait("Category", "Validation")]
     public class CancelOrderByUserCommandValidatorTest
     {
         private readonly CancelOrderByUserCommandValidator _validator;

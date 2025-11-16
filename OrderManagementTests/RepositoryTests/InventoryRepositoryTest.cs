@@ -7,19 +7,18 @@ using OrderManagement.Repositories;
 
 namespace OrderManagementTests
 {
+    [Trait("Category", "Repository")]
     public class InventoryRepositoryTest : BaseRepositoryTest
     {
         private readonly InventoryRepository _inventoryRepository;
         public InventoryRepositoryTest() : base("inventory")
         {
-            _inventoryRepository = new InventoryRepository(_mongoDBSettings);
+            _inventoryRepository = new InventoryRepository(MongoDbSettings);
         }
 
         private async Task<Inventory> CreateTestInventory()
         {
-            var mongoClient = new MongoClient(_mongoDBSettings.Value.ConnectionString);
-            var database = mongoClient.GetDatabase(_mongoDBSettings.Value.DatabaseName);
-            var collection = database.GetCollection<Inventory>("Inventory");
+            var collection = Database.GetCollection<Inventory>("Inventory");
             
             var inventory = new Inventory
             {

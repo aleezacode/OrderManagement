@@ -1,28 +1,46 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using MongoDB.Driver;
 using Microsoft.Extensions.Options;
-using Mongo2Go;
-using MongoDB.Driver;
 using OrderManagement.Configuration;
+using Testcontainers.MongoDb;
 
 namespace OrderManagementTests;
 
-public class BaseRepositoryTest : IDisposable
+public class BaseRepositoryTest : IAsyncLifetime
 {
-    protected readonly MongoDbRunner _mongoRunner;
-    protected readonly IOptions<MongoDBSettings> _mongoDBSettings;
+    private readonly MongoDbContainer _mongoContainer;
+    protected IOptions<MongoDBSettings> MongoDbSettings { get; private set; } = default!;
+    protected IMongoClient Client { get; private set; } = default!;
+    protected IMongoDatabase Database { get; private set; } = default!;
+
+    private readonly string _collectionName;
+
     protected BaseRepositoryTest(string collectionName)
     {
-        _mongoRunner = MongoDbRunner.Start();
-        _mongoDBSettings = Options.Create(new MongoDBSettings
-        {
-            ConnectionString = _mongoRunner.ConnectionString,
-            DatabaseName = "OrderManagementTestDb",
-            OrdersCollectionName = collectionName
-        });
+        _collectionName = collectionName;
+
+        _mongoContainer = new MongoDbBuilder()
+            .WithImage("mongo:7")
+            .Build();
     }
 
-    public void Dispose()
+    public async Task InitializeAsync()
     {
-        _mongoRunner.Dispose();
+        await _mongoContainer.StartAsync();
+
+        var conn = _mongoContainer.GetConnectionString();
+        MongoDbSettings = Options.Create(new MongoDBSettings
+        {
+            ConnectionString = conn,
+            DatabaseName = "UnitTestDb",
+            OrdersCollectionName = _collectionName
+        });
+
+        Client = new MongoClient(conn);
+        Database = Client.GetDatabase("UnitTestDb");
+    }
+
+    public async Task DisposeAsync()
+    {
+        await _mongoContainer.DisposeAsync();
     }
 }

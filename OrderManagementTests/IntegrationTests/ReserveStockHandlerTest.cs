@@ -8,6 +8,7 @@ using OrderManagement.Repositories;
 
 namespace OrderManagementTests.IntegrationTests
 {
+    [Trait("Category", "Integration")]
     public class ReserveStockHandlerTest : BaseIntegrationTest
     {
         private IRepository<Inventory> _inventoryRepository;

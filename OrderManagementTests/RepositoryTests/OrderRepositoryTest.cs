@@ -9,13 +9,14 @@ using OrderManagement.Repositories;
 
 namespace OrderManagementTests
 {
+    [Trait("Category", "Repository")]
     public class OrderRepositoryTest : BaseRepositoryTest
     {
         private readonly OrderRepository _orderRepository;
 
         public OrderRepositoryTest() : base("Orders")
         {
-            _orderRepository = new OrderRepository(_mongoDBSettings);
+            _orderRepository = new OrderRepository(MongoDbSettings);
         }
 
         [Fact]

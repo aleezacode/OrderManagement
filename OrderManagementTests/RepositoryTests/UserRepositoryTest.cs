@@ -7,19 +7,18 @@ using OrderManagement.Repositories;
 
 namespace OrderManagementTests
 {
+    [Trait("Category", "Repository")]
     public class UserRepositoryTest : BaseRepositoryTest
     {
         private readonly UserRepository _userRepository;
         public UserRepositoryTest() : base("users")
         {
-            _userRepository = new UserRepository(_mongoDBSettings);
+            _userRepository = new UserRepository(MongoDbSettings);
         }
 
         private async Task<User> CreateTestUser()
         {
-            var mongoClient = new MongoClient(_mongoDBSettings.Value.ConnectionString);
-            var database = mongoClient.GetDatabase(_mongoDBSettings.Value.DatabaseName);
-            var collection = database.GetCollection<User>("Users");
+            var collection = Database.GetCollection<User>("Users");
             
             var user = new User
             {

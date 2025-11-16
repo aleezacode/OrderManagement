@@ -5,6 +5,7 @@ using OrderManagement.Validators.Inventory;
 
 namespace OrderManagementTests.ValidationTests
 {
+    [Trait("Category", "Validation")]
     public class ReleaseStockCommandValidatorTest
     {
         private readonly ReleaseStockCommandValidator _validator;

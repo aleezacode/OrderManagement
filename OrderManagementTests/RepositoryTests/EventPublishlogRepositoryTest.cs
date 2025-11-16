@@ -7,12 +7,13 @@ using OrderManagement.Repositories;
 
 namespace OrderManagementTests
 {
+    [Trait("Category", "Repository")]
     public class EventPublishlogRepositoryTest : BaseRepositoryTest
     {
         private readonly EventPublishlogRepository _eventPublishlogRepository;
         public EventPublishlogRepositoryTest() : base("EventPublishlog")
         {
-            _eventPublishlogRepository = new EventPublishlogRepository(_mongoDBSettings);
+            _eventPublishlogRepository = new EventPublishlogRepository(MongoDbSettings);
         }
 
         private async Task<OrderCancelled> CreateEvent()

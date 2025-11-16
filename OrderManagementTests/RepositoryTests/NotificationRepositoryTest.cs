@@ -9,12 +9,13 @@ using OrderManagement.Repositories;
 
 namespace OrderManagementTests
 {
+    [Trait("Category", "Repository")]
     public class NotificationRepositoryTest : BaseRepositoryTest
     {
         private readonly NotificationRepository _notificationRepository;
         public NotificationRepositoryTest() : base("Notifications")
         {
-            _notificationRepository = new NotificationRepository(_mongoDBSettings);
+            _notificationRepository = new NotificationRepository(MongoDbSettings);
         }
 
         [Fact]

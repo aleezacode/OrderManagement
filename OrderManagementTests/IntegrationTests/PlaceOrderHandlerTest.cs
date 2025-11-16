@@ -10,6 +10,7 @@ using OrderItem = OrderManagement.Commands.Order.OrderItem;
 
 namespace OrderManagementTests.IntegrationTests
 {
+    [Trait("Category", "Integration")]
     public class PlaceOrderHandlerTest : BaseIntegrationTest
     {
         private IRepository<Order> _orderRepository;

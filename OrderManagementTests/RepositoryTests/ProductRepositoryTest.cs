@@ -7,20 +7,19 @@ using OrderManagement.Repositories;
 
 namespace OrderManagementTests
 {
+    [Trait("Category", "Repository")]
     public class ProductRepositoryTest : BaseRepositoryTest
     {
         private readonly ProductRepository _productRepository;
 
         public ProductRepositoryTest() : base("Products")
         {
-            _productRepository = new ProductRepository(_mongoDBSettings);
+            _productRepository = new ProductRepository(MongoDbSettings);
         }
 
         private async Task<Product> CreateTestProduct()
         {
-            var mongoClient = new MongoClient(_mongoDBSettings.Value.ConnectionString);
-            var database = mongoClient.GetDatabase(_mongoDBSettings.Value.DatabaseName);
-            var collection = database.GetCollection<Product>("Products");
+            var collection = Database.GetCollection<Product>("Products");
             
             var product = new Product
             {
