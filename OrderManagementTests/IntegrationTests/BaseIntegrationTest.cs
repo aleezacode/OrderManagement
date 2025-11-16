@@ -120,12 +120,10 @@ namespace OrderManagementTests.IntegrationTests
                 await inventoryCollection.InsertOneAsync(inventory);
 
                 return newProduct;
-            }
-
-            var testInventory = await inventoryCollection.Find(x => x.ProductId == testProduct.Id).FirstOrDefaultAsync();
-            if (testInventory.Quantity < 5)
+            } else
             {
-                testInventory.Quantity = 30;
+                var testInventory = await inventoryCollection.Find(x => x.ProductId == testProduct.Id).FirstOrDefaultAsync();
+                testInventory.Quantity = 100;
                 await inventoryCollection.ReplaceOneAsync(testInventory.Id, testInventory);
             }
 
