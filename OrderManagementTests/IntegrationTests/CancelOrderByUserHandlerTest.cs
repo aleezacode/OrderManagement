@@ -78,7 +78,7 @@ namespace OrderManagementTests.IntegrationTests
                 () => Mediator.Send(command));
 
             Assert.Contains("Order has status", exception.Message);
-            Assert.Contains("Completed", exception.Message);
+            Assert.Contains("Paid", exception.Message);
         }
 
         [Fact]
