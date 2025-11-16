@@ -11,7 +11,7 @@ using OrderManagement.Exceptions;
 
 namespace OrderManagement.Handlers.Notification
 {
-    public class SendNotificationHandler : IRequestHandler<SendNotificationCommand, string>
+    public class SendNotificationHandler : IRequestHandler<SendNotificationCommand, bool>
     {
         private readonly IRepository<OrderModel> _orderRepository;
         private readonly IRepository<NotificationModel> _notificationRepository;
@@ -26,7 +26,7 @@ namespace OrderManagement.Handlers.Notification
             _eventProducer = eventProducer;
             _logger = logger;
         }
-        public async Task<string> Handle(SendNotificationCommand request, CancellationToken cancellationToken)
+        public async Task<bool> Handle(SendNotificationCommand request, CancellationToken cancellationToken)
         {
             try
             {
@@ -60,7 +60,7 @@ namespace OrderManagement.Handlers.Notification
                 await _eventProducer.ProduceAsync("notification-sent", notificationSent);
                 _logger.LogInformation($"Published NotificationSent event for order: {order.Id}");
 
-                return notification.Id!;
+                return true;
             }
             catch (DocumentNotFoundException ex)
             {

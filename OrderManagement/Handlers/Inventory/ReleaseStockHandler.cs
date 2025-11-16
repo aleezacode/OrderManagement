@@ -33,20 +33,6 @@ namespace OrderManagement.Handlers.Inventory
 
                 await _inventoryRepository.UpdateAsync(inventory.Id, inventory);
 
-
-                var stockReleasedEvent = new StockReleased()
-                {
-                    ProductId = inventory.ProductId,
-                    ReleasedQuantity = request.ReleaseQuantity,
-                    PreviousQuantity = previousQuantity,
-                    NewQuantity = inventory.Quantity,
-                    Reason = "User cancelled order"
-                };
-
-                _logger.LogInformation($"Publishing StockReleased event for product: {inventory.ProductId}");
-                await _eventProducer.ProduceAsync("stock-released", stockReleasedEvent);
-                _logger.LogInformation($"Published StockReleased event for product: {inventory.ProductId}");
-
                 return true;
             }
             catch (DocumentNotFoundException ex)

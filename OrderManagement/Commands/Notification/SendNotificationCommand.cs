@@ -6,5 +6,5 @@ using MediatR;
 
 namespace OrderManagement.Commands.Notification
 {
-    public record SendNotificationCommand(string OrderId, string Message) : IRequest<string>;
+    public record SendNotificationCommand(string OrderId, string Message) : IRequest<bool>;
 }

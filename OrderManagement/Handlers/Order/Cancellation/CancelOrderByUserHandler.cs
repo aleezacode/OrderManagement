@@ -40,12 +40,9 @@ namespace OrderManagement.Handlers.Order.Cancellation
                     throw new InvalidOperationException($"Order has status {order.OrderStatus}");
                 }
 
-                if (order.OrderStatus == OrderStatus.Placed)
-                {
-                    _logger.LogInformation($"Releasing stock for product {order.Item.ProductId} from order: {order.Id}");
-                    var releaseStockCommand = new ReleaseStockCommand(order.Item.ProductId, order.Item.Quantity);
-                    await _mediator.Send(releaseStockCommand, cancellationToken);
-                }
+                _logger.LogInformation($"Releasing stock for product {order.Item.ProductId} from order: {order.Id}");
+                var releaseStockCommand = new ReleaseStockCommand(order.Item.ProductId, order.Item.Quantity);
+                await _mediator.Send(releaseStockCommand, cancellationToken);
 
                 order.OrderStatus = OrderStatus.Cancelled;
                 await _orderRepository.UpdateAsync(order.Id, order);
@@ -66,12 +63,12 @@ namespace OrderManagement.Handlers.Order.Cancellation
             }
             catch (DocumentNotFoundException ex)
             {
-                _logger.LogError(ex, $"Failed to find order with id {request.OrderId}");
+                _logger.LogError(ex, $"Document not found while cancelling order {request.OrderId}");
                 throw;
             }
             catch (DocumentUpdatedFailedException ex)
             {
-                _logger.LogError(ex, $"Failed to update order with id {request.OrderId}");
+                _logger.LogError(ex, $"Failed to update document while cancelling order {request.OrderId}");
                 throw;
             }
             catch (Exception ex)

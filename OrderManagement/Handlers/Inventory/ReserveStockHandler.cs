@@ -13,7 +13,7 @@ using OrderManagement.Exceptions;
 
 namespace OrderManagement.Handlers.Inventory
 {
-    public class ReserveStockHandler : IRequestHandler<ReserveStockCommand, string>
+    public class ReserveStockHandler : IRequestHandler<ReserveStockCommand, bool>
     {
         private readonly IRepository<InventoryModel> _inventoryRepository;
         private readonly IEventProducer _eventProducer;
@@ -25,7 +25,7 @@ namespace OrderManagement.Handlers.Inventory
             _logger = logger;
         }
 
-        public async Task<string> Handle(ReserveStockCommand command, CancellationToken cancellationToken)
+        public async Task<bool> Handle(ReserveStockCommand command, CancellationToken cancellationToken)
         {
             try
             {
@@ -61,7 +61,7 @@ namespace OrderManagement.Handlers.Inventory
                 await _eventProducer.ProduceAsync("inventory-reserve", inventoryReservedEvent, cancellationToken);
                 _logger.LogInformation($"Published InventoryReserved event for order {command.OrderId}");
 
-                return command.OrderId;
+                return true;
             }
             catch (DocumentNotFoundException ex)
             {
