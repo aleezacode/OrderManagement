@@ -16,11 +16,9 @@ namespace OrderManagement.Repositories
     public class EventPublishlogRepository : IRepository<EventPublishlog>
     {
         private readonly IMongoCollection<EventPublishlog> _eventPublishlogCollection;
-        public EventPublishlogRepository(IOptions<MongoDBSettings> mongoDBSettings)
+        public EventPublishlogRepository(IMongoDatabase database, IOptions<MongoDBSettings> mongoDBSettings)
         {
-            var mongoClient = new MongoClient(mongoDBSettings.Value.ConnectionString);
-            var mongoDatabase = mongoClient.GetDatabase(mongoDBSettings.Value.DatabaseName);
-            _eventPublishlogCollection = mongoDatabase.GetCollection<EventPublishlog>(mongoDBSettings.Value.EventPublishLogCollectionName);
+            _eventPublishlogCollection = database.GetCollection<EventPublishlog>(mongoDBSettings.Value.EventPublishLogCollectionName);
         }
 
         public async Task<EventPublishlog> CreateAsync(EventPublishlog entity)
