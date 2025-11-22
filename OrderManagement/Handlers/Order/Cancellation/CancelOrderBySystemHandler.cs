@@ -29,6 +29,11 @@ namespace OrderManagement.Handlers.Order.Cancellation
                 _logger.LogInformation($"Handling CancelOrderBySystem command for order {request.OrderId}");
                 var order = await _orderRepository.GetByIdAsync(request.OrderId);
 
+                if (order.OrderStatus != OrderStatus.Placed)
+                {
+                    _logger.LogWarning($"Order cannot be cancelled by system. Order: {order.Id} has status {order.OrderStatus}");
+                    return false; //TODO: maybe add an exception
+                }
                 order.OrderStatus = OrderStatus.Cancelled;
                 await _orderRepository.UpdateAsync(request.OrderId, order);
 
