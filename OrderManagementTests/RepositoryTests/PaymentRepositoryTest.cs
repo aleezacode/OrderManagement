@@ -63,7 +63,7 @@ namespace OrderManagementTests
             {
                 OrderId = ObjectId.GenerateNewId().ToString(),
                 Amount = 29.99m,
-                PaymentStatus = PaymentStatus.Pending,
+                PaymentStatus = PaymentStatus.Processed,
                 UserId = "64a7f0c2e1b8c8f5d6a4e9b2"
             };
 
@@ -111,12 +111,12 @@ namespace OrderManagementTests
             {
                 OrderId = ObjectId.GenerateNewId().ToString(),
                 Amount = 49.99m,
-                PaymentStatus = PaymentStatus.Pending,
+                PaymentStatus = PaymentStatus.Processed,
                 UserId = "64a7f0c2e1b8c8f5d6a4e9b3"
             };
 
             var createdPayment = await _paymentRepository.CreateAsync(payment);
-            createdPayment.PaymentStatus = PaymentStatus.Processed;
+            createdPayment.PaymentStatus = PaymentStatus.Failed;
             createdPayment.ProcessedAt = DateTime.UtcNow;
 
             await _paymentRepository.UpdateAsync(createdPayment.Id, createdPayment);
@@ -135,7 +135,7 @@ namespace OrderManagementTests
             {
                 OrderId = ObjectId.GenerateNewId().ToString(),
                 Amount = 29.99m,
-                PaymentStatus = PaymentStatus.Pending,
+                PaymentStatus = PaymentStatus.Processed,
                 UserId = "64a7f0c2e1b8c8f5d6a4e9b2"
             };
 

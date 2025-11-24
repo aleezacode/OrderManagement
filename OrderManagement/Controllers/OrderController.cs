@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc;
 using OrderManagement.Commands.Order.Cancellation;
 using OrderManagement.Commands.Order;
 using OrderManagement.Requests;
+using OrderManagement.Commands.Payment;
+using System.ComponentModel.DataAnnotations;
 
 namespace OrderManagement.Controllers
 {
@@ -43,7 +45,22 @@ namespace OrderManagement.Controllers
             var cancelOrderCommand = new CancelOrderByUserCommand(request.OrderId, request.Reason);
 
             var cancelled = await _mediator.Send(cancelOrderCommand);
-            return Ok(cancelled);
+            return Ok(new { Success = cancelled });
+        }
+
+        [HttpPost("payment")]
+        public async Task<IActionResult> ProcessPayment(
+            [Required(ErrorMessage = "OrderId is required")]
+            [RegularExpression(@"^[a-fA-F0-9]{24}$", ErrorMessage = "OrderId must be a valid ObjectId")]
+            string orderId)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var processPaymentCommand = new ProcessPaymentCommand(orderId);
+            var result = await _mediator.Send(processPaymentCommand);
+            return Ok(new {Success = result });
         }
     }
 }
