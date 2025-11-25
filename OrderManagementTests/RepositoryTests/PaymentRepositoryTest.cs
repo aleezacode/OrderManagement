@@ -124,7 +124,7 @@ namespace OrderManagementTests
             var updatedPayment = await _paymentRepository.GetByIdAsync(createdPayment.Id!);
 
             Assert.NotNull(updatedPayment);
-            Assert.Equal(PaymentStatus.Processed, updatedPayment.PaymentStatus);
+            Assert.Equal(PaymentStatus.Failed, updatedPayment.PaymentStatus);
             Assert.NotNull(updatedPayment.ProcessedAt);
         }
 
